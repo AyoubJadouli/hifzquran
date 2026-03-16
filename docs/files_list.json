@@ -1,0 +1,173 @@
+{
+  "type": "directory",
+  "name": "root",
+  "children": [
+    {
+      "type": "directory",
+      "name": "entities",
+      "children": [
+        { "type": "file", "name": "Chunk" },
+        { "type": "file", "name": "Recording" },
+        { "type": "file", "name": "UserSettings" }
+      ]
+    },
+    {
+      "type": "directory",
+      "name": "src",
+      "children": [
+        {
+          "type": "directory",
+          "name": "api",
+          "children": [
+            { "type": "file", "name": "base44Client.js" }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "components",
+          "children": [
+            {
+              "type": "directory",
+              "name": "home",
+              "children": [
+                { "type": "file", "name": "ChunkHeader.jsx" },
+                { "type": "file", "name": "ControlBar.jsx" },
+                { "type": "file", "name": "LuxuryControlBar.jsx" },
+                { "type": "file", "name": "LuxuryVerseStack.jsx" },
+                { "type": "file", "name": "OptionsSheet.jsx" },
+                { "type": "file", "name": "PlaybackControls.jsx" },
+                { "type": "file", "name": "PlaybackStatusBar.jsx" },
+                { "type": "file", "name": "SurahSelector.jsx" },
+                { "type": "file", "name": "VerseCard.jsx" },
+                { "type": "file", "name": "VerseScroller.jsx" }
+              ]
+            },
+            {
+              "type": "directory",
+              "name": "record",
+              "children": [
+                { "type": "file", "name": "VerseProgressTrack.jsx" },
+                { "type": "file", "name": "WaveformVisualizer.jsx" }
+              ]
+            },
+            {
+              "type": "directory",
+              "name": "ui",
+              "children": [
+                { "type": "file", "name": "accordion.jsx" },
+                { "type": "file", "name": "alert-dialog.jsx" },
+                { "type": "file", "name": "alert.jsx" },
+                { "type": "file", "name": "aspect-ratio.jsx" },
+                { "type": "file", "name": "avatar.jsx" },
+                { "type": "file", "name": "badge.jsx" },
+                { "type": "file", "name": "breadcrumb.jsx" },
+                { "type": "file", "name": "button.jsx" },
+                { "type": "file", "name": "calendar.jsx" },
+                { "type": "file", "name": "card.jsx" },
+                { "type": "file", "name": "carousel.jsx" },
+                { "type": "file", "name": "chart.jsx" },
+                { "type": "file", "name": "checkbox.jsx" },
+                { "type": "file", "name": "collapsible.jsx" },
+                { "type": "file", "name": "command.jsx" },
+                { "type": "file", "name": "context-menu.jsx" },
+                { "type": "file", "name": "dialog.jsx" },
+                { "type": "file", "name": "drawer.jsx" },
+                { "type": "file", "name": "dropdown-menu.jsx" },
+                { "type": "file", "name": "form.jsx" },
+                { "type": "file", "name": "hover-card.jsx" },
+                { "type": "file", "name": "input-otp.jsx" },
+                { "type": "file", "name": "input.jsx" },
+                { "type": "file", "name": "label.jsx" },
+                { "type": "file", "name": "menubar.jsx" },
+                { "type": "file", "name": "navigation-menu.jsx" },
+                { "type": "file", "name": "pagination.jsx" },
+                { "type": "file", "name": "popover.jsx" },
+                { "type": "file", "name": "progress.jsx" },
+                { "type": "file", "name": "radio-group.jsx" },
+                { "type": "file", "name": "resizable.jsx" },
+                { "type": "file", "name": "scroll-area.jsx" },
+                { "type": "file", "name": "select.jsx" },
+                { "type": "file", "name": "separator.jsx" },
+                { "type": "file", "name": "sheet.jsx" },
+                { "type": "file", "name": "sidebar.jsx" },
+                { "type": "file", "name": "skeleton.jsx" },
+                { "type": "file", "name": "slider.jsx" },
+                { "type": "file", "name": "sonner.jsx" },
+                { "type": "file", "name": "switch.jsx" },
+                { "type": "file", "name": "table.jsx" },
+                { "type": "file", "name": "tabs.jsx" },
+                { "type": "file", "name": "textarea.jsx" },
+                { "type": "file", "name": "toast.jsx" },
+                { "type": "file", "name": "toaster.jsx" },
+                { "type": "file", "name": "toggle-group.jsx" },
+                { "type": "file", "name": "toggle.jsx" },
+                { "type": "file", "name": "tooltip.jsx" },
+                { "type": "file", "name": "use-toast.jsx" }
+              ]
+            },
+            { "type": "file", "name": "AppLayout.jsx" },
+            { "type": "file", "name": "fileStorage.jsx" },
+            { "type": "file", "name": "localData.jsx" },
+            { "type": "file", "name": "quranData.jsx" },
+            { "type": "file", "name": "ThemeContext.jsx" },
+            { "type": "file", "name": "UserNotRegisteredError.jsx" },
+            { "type": "file", "name": "useSettings.jsx" },
+            { "type": "file", "name": "useThemeColors.jsx" }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "hooks",
+          "children": [
+            { "type": "file", "name": "use-mobile.jsx" }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "lib",
+          "children": [
+            { "type": "file", "name": "app-params.js" },
+            { "type": "file", "name": "AuthContext.jsx" },
+            { "type": "file", "name": "PageNotFound.jsx" },
+            { "type": "file", "name": "query-client.js" },
+            { "type": "file", "name": "utils.js" }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "pages",
+          "children": [
+            { "type": "file", "name": "AppSettings.jsx" },
+            { "type": "file", "name": "Home.jsx" },
+            { "type": "file", "name": "Progress.jsx" },
+            { "type": "file", "name": "Record.jsx" },
+            { "type": "file", "name": "SurahDetail.jsx" },
+            { "type": "file", "name": "Surahs.jsx" }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "utils",
+          "children": [
+            { "type": "file", "name": "index.ts" }
+          ]
+        },
+        { "type": "file", "name": "App.jsx" },
+        { "type": "file", "name": "globals.css" },
+        { "type": "file", "name": "index.css" },
+        { "type": "file", "name": "main.jsx" },
+        { "type": "file", "name": "pages.config.js" }
+      ]
+    },
+    { "type": "file", "name": ".gitignore" },
+    { "type": "file", "name": "components.json" },
+    { "type": "file", "name": "eslint.config.js" },
+    { "type": "file", "name": "index.html" },
+    { "type": "file", "name": "jsconfig.json" },
+    { "type": "file", "name": "package.json" },
+    { "type": "file", "name": "postcss.config.js" },
+    { "type": "file", "name": "README.md" },
+    { "type": "file", "name": "tailwind.config.js" },
+    { "type": "file", "name": "vite.config.js" }
+  ]
+}

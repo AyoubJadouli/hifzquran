@@ -1,0 +1,121 @@
+# 10 — LIBRARY PAGE
+# SCREEN 5 — LIBRARY PAGE (NEW)
+
+## Route: `/library`
+
+## 5.1 PURPOSE
+
+Central hub for managing all recordings across all surahs. Browse, rename, delete, export, and organize recordings. Replaces the "Last Read" tab with something more useful.
+
+## 5.2 ASCII WIREFRAME
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                              │
+│ ┌─ APP BAR ──────────────────────────────────────────────┐   │
+│ │              📑  Library                                │   │
+│ └────────────────────────────────────────────────────────┘   │
+│                                                              │
+│ ┌─ TAB BAR ──────────────────────────────────────────────┐   │
+│ │    [Recordings]      [Bookmarks]      [Collections]     │   │
+│ │        ━━━                                              │   │
+│ └────────────────────────────────────────────────────────┘   │
+│                                                              │
+│                 ══ RECORDINGS TAB ══                          │
+│                                                              │
+│ ┌─ SUMMARY BAR ─────────────────────────────────────────┐    │
+│ │  128 recordings  ·  12h 47m total  ·  247 MB           │    │
+│ └────────────────────────────────────────────────────────┘    │
+│                                                              │
+│ ┌─ GROUP: Al-Fatihah ───────────────────────────────────┐    │
+│ │                                                        │    │
+│ │  الفاتحة  Al-Fatihah  ·  3 recordings                  │    │
+│ │                                                        │    │
+│ │  ╭────────────────────────────────────────────────╮    │    │
+│ │  │  ♫  Morning Session 1                          │    │    │
+│ │  │     Chunk 1 (1-7)  ·  03:24  ·  Mar 15         │    │    │
+│ │  │                                                │    │    │
+│ │  │     ╭────╮  ╭────╮  ╭────╮  ╭────╮  ╭────╮    │    │    │
+│ │  │     │ ▶  │  │ ✏️ │  │ 📤 │  │ 📋 │  │ 🗑️ │    │    │    │
+│ │  │     │play│  │edit│  │send│  │copy│  │del │    │    │    │
+│ │  │     ╰────╯  ╰────╯  ╰────╯  ╰────╯  ╰────╯    │    │    │
+│ │  ╰────────────────────────────────────────────────╯    │    │
+│ │                                                        │    │
+│ │  ╭────────────────────────────────────────────────╮    │    │
+│ │  │  ♫  Evening Review                             │    │    │
+│ │  │     Chunk 1 (1-7)  ·  02:58  ·  Mar 14         │    │    │
+│ │  │     ╭────╮  ╭────╮  ╭────╮  ╭────╮  ╭────╮    │    │    │
+│ │  │     │ ▶  │  │ ✏️ │  │ 📤 │  │ 📋 │  │ 🗑️ │    │    │    │
+│ │  │     ╰────╯  ╰────╯  ╰────╯  ╰────╯  ╰────╯    │    │    │
+│ │  ╰────────────────────────────────────────────────╯    │    │
+│ │                                                        │    │
+│ └────────────────────────────────────────────────────────┘    │
+│                                                              │
+│ ┌─ GROUP: Al-Baqarah ──────────────────────────────────┐     │
+│ │                                                       │     │
+│ │  البقرة  Al-Baqarah  ·  5 recordings                  │     │
+│ │                                                       │     │
+│ │  ... (collapsed by default, tap header to expand)     │     │
+│ │                                                       │     │
+│ └───────────────────────────────────────────────────────┘     │
+│                                                              │
+│ ... (more surah groups)                                      │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│   🏠        📖        📑        📊        ⚙️               │
+│                       ━━                                     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## 5.3 TAB DETAILS
+
+### Recordings Tab
+
+| Feature | Details |
+|---------|---------|
+| **Grouping** | Recordings grouped by surah. Each group is collapsible (accordion). |
+| **Sort** | By date (newest first), by name, by duration, by surah order. |
+| **Search** | Search recordings by name. |
+| **Actions per recording** | ▶ Play (navigates to Home with that chunk + auto-selects this recording), ✏️ Rename (inline dialog), 📤 Share/Export (system share sheet for the `.m4a` files), 📋 Duplicate (copies with "(copy)" suffix), 🗑️ Delete (confirmation dialog). |
+| **Swipe to delete** | Swipe left on any recording row → red delete zone with confirmation. |
+| **Batch select** | Long press → enters multi-select mode. Select multiple → batch delete/export. |
+| **Empty state** | Large microphone icon + "No recordings yet. Start by picking a surah and recording your first chunk!" + button → `/surahs`. |
+
+### Bookmarks Tab
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                              │
+│                 ══ BOOKMARKS TAB ══                           │
+│                                                              │
+│  ╭────────────────────────────────────────────────────────╮  │
+│  │  ⭐  Al-Fatihah · Verse 5                              │  │
+│  │     إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ            │  │
+│  │     Bookmarked: Mar 15 at 10:30 AM                     │  │
+│  │                                        [▶ Go]  [✕]     │  │
+│  ╰────────────────────────────────────────────────────────╯  │
+│                                                              │
+│  ╭────────────────────────────────────────────────────────╮  │
+│  │  ⭐  Al-Baqarah · Verse 255 (Ayat al-Kursi)           │  │
+│  │     اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ   │  │
+│  │     Bookmarked: Mar 12 at 08:15 PM                     │  │
+│  │                                        [▶ Go]  [✕]     │  │
+│  ╰────────────────────────────────────────────────────────╯  │
+│                                                              │
+│  Empty: "Double-tap any verse on the Home page to bookmark"  │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+- Bookmarked verses from double-tap gesture on Home Page
+- Each shows surah name, verse number, Arabic preview, bookmark timestamp
+- [▶ Go] navigates to Home with that verse's chunk loaded
+- [✕] removes bookmark
+
+### Collections Tab (Future Feature Placeholder)
+
+- Custom playlists of chunks across different surahs
+- E.g., "Daily Morning Routine" = Al-Fatihah + Ayat al-Kursi + Al-Mulk (first chunk)
+- For MVP, show: "Coming soon — create custom playlists of your favorite chunks"
+
+---
