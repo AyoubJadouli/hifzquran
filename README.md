@@ -233,6 +233,60 @@ Current project SEO links can be adjusted to your final canonical host before de
 
 ---
 
+## Deploy to GitHub Pages (hifzquran.los.ma)
+
+You can deploy in 2 ways:
+
+### A) GitHub Actions (recommended)
+
+This repo includes:
+
+- `.github/workflows/deploy-github-pages.yml`
+
+How to enable:
+
+1. GitHub repo → **Settings** → **Pages**
+2. Source: **GitHub Actions**
+3. Push to `main` to trigger deploy.
+
+No extra token secret is required for this workflow (uses built-in `GITHUB_TOKEN`).
+
+### B) Local deploy script (using GitHub token)
+
+Script included:
+
+- `scripts/deploy-github-pages.sh`
+
+Run:
+
+```bash
+chmod +x ./scripts/deploy-github-pages.sh
+
+GH_TOKEN="<your_github_pat>" \
+GH_REPO="AyoubJadouli/hifzquran" \
+./scripts/deploy-github-pages.sh
+```
+
+What it does:
+
+- runs build,
+- copies SPA fallback (`dist/404.html`),
+- force-pushes `dist/` to `gh-pages` branch.
+
+### Custom domain
+
+This repo includes:
+
+- `public/CNAME` with `hifzquran.los.ma`
+
+In GitHub Pages settings:
+
+1. Set custom domain to `hifzquran.los.ma`
+2. Enforce HTTPS
+3. Ensure DNS `CNAME` for `hifzquran.los.ma` points to `<your-username>.github.io`
+
+---
+
 ## Known Notes
 
 - Build warns about large bundle chunks (non-blocking). Consider route-level code splitting later.
