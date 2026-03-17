@@ -40,12 +40,6 @@ Create token and copy it once shown.
 Any of these methods:
 
 - In Cloudflare Dashboard URL when inside account
-- Right sidebar in account overview pages
-
-Store it as:
-
-- `CLOUDFLARE_ACCOUNT_ID` (GitHub secret)
-- `CF_ACCOUNT_ID` (local script env var)
 
 ---
 
