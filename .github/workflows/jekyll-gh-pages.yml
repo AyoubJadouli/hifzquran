@@ -36,18 +36,19 @@ jobs:
       - name: Install dependencies
         env:
           NODE_ENV: development
-          NPM_CONFIG_PRODUCTION: "false"
-          NPM_CONFIG_INCLUDE: dev
-        run: npm install --no-audit --no-fund
-
-      - name: Verify Vite toolchain is installed locally
+          npm_config_production: "false"
+          npm_config_include: dev
+          npm_config_omit: ""
         run: |
+          npm config delete omit || true
+          npm install --no-audit --no-fund
           test -f node_modules/vite/package.json
           test -f node_modules/@vitejs/plugin-react/package.json
-          node -p "require('./node_modules/vite/package.json').version"
           ./node_modules/.bin/vite --version
 
       - name: Build app
+        env:
+          NODE_ENV: development
         run: ./node_modules/.bin/vite build
 
       - name: SPA fallback
