@@ -1,7 +1,7 @@
 name: Deploy to GitHub Pages
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 on:
   push:
@@ -36,20 +36,16 @@ jobs:
       - name: Install dependencies
         env:
           NODE_ENV: development
-          npm_config_production: "false"
-          npm_config_include: dev
-          npm_config_omit: ""
-        run: |
-          npm config delete omit || true
-          npm install --no-audit --no-fund
-          test -f node_modules/vite/package.json
-          test -f node_modules/@vitejs/plugin-react/package.json
-          ./node_modules/.bin/vite --version
+        run: npm install --no-audit --no-fund
 
       - name: Build app
         env:
           NODE_ENV: development
-        run: ./node_modules/.bin/vite build
+        run: |
+          test -f node_modules/vite/package.json
+          test -f node_modules/@vitejs/plugin-react/package.json
+          ./node_modules/.bin/vite --version
+          ./node_modules/.bin/vite build
 
       - name: SPA fallback
         run: cp dist/index.html dist/404.html
