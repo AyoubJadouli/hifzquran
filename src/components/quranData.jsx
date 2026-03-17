@@ -121,6 +121,11 @@ export async function prefetchAllQuranData(languages = ["en"]) {
   return { completed, total, languages: langs };
 }
 
+export async function prefetchFullQuranWarsh(language = "en") {
+  const lang = TRANSLATION_EDITIONS[language] ? language : "en";
+  return prefetchAllQuranData([lang]);
+}
+
 export function generateChunks(totalVerses, chunkSize, overlap) {
   const chunks = [];
   let currentStart = 1;

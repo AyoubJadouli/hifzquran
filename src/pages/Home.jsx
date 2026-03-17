@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { localEntities } from "../components/localData";
 import { resolveAudioUrl } from "../components/fileStorage";
-import { fetchSurahVerses, generateChunks } from "../components/quranData";
+import { fetchSurahVerses, generateChunks, prefetchFullQuranWarsh } from "../components/quranData";
 import { useSettings } from "../components/useSettings";
 import ChunkHeader from "../components/home/ChunkHeader";
 import { useThemeColors } from "../components/useThemeColors";
@@ -41,6 +41,7 @@ export default function Home() {
   const [shuffleVerses, setShuffleVerses] = useState(false);
   const [autoAdvanceChunk, setAutoAdvanceChunk] = useState(true);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [showRecitePrompt, setShowRecitePrompt] = useState(false);
 
   // Refs for playback engine
   const playbackRef = useRef({ stop: false, pause: false, skipToVerse: null });
@@ -62,10 +63,22 @@ export default function Home() {
   // Initial load
   useEffect(() => {
     if (!settingsLoading) {
-      setSpeed(settings.default_speed || 1.0);
-      setVerseRepetition(settings.default_verse_repetition || 3);
-      setChunkRepetition(settings.default_chunk_repetition || 1);
+      setSpeed(settings.default_speed ?? 1.0);
+      setVerseRepetition(settings.default_verse_repetition ?? 1);
+      setChunkRepetition(settings.default_chunk_repetition ?? 0);
       loadInitialData();
+
+      // Warm up local cache with full Quran in Warsh riwaya (non-blocking)
+      const prefetchKey = `hifz_prefetched_full_warsh_${settings.display_language || "en"}`;
+      if (!localStorage.getItem(prefetchKey)) {
+        prefetchFullQuranWarsh(settings.display_language || "en")
+          .then(() => {
+            localStorage.setItem(prefetchKey, "1");
+          })
+          .catch(() => {
+            // Best effort; keep app responsive even if prefetch fails.
+          });
+      }
     }
   }, [settingsLoading, settings.display_language]);
 
@@ -134,6 +147,22 @@ export default function Home() {
     } else {
       setSelectedRecordingId(null);
     }
+  }
+
+  async function incrementListenCountForCurrentChunk() {
+    if (!currentChunk) return;
+    const listenCount = (currentChunk.listen_count || 0) + 1;
+    const recitePromptThreshold = settings.recite_prompt_threshold || 10;
+    const shouldPrompt =
+      listenCount >= recitePromptThreshold &&
+      !(currentChunk.recite_prompt_dismissed ?? false) &&
+      currentChunk.status !== "completed";
+
+    await localEntities.Chunk.update(currentChunk.id, { listen_count: listenCount });
+    setChunks((prev) =>
+      prev.map((c) => (c.id === currentChunk.id ? { ...c, listen_count: listenCount } : c))
+    );
+    if (shouldPrompt) setShowRecitePrompt(true);
   }
 
   async function goToChunk(index) {
@@ -217,6 +246,8 @@ export default function Home() {
   const startPlayback = useCallback(async () => {
     const recording = recordings.find(r => r.id === selectedRecordingId);
     if (!recording?.verse_files?.length) return;
+
+    incrementListenCountForCurrentChunk();
 
     playbackRef.current = { stop: false, pause: false, skipToVerse: null };
     setPlaybackState("playing");
@@ -339,7 +370,21 @@ export default function Home() {
 
   function handleRecord() {
     if (playbackState !== "idle") stopPlayback();
-    if (currentChunk) navigate(`/Record?chunkId=${currentChunk.id}`);
+    if (currentChunk) navigate(`/app/Record?chunkId=${currentChunk.id}`);
+  }
+
+  function handleRecite() {
+    if (!currentChunk) return;
+    navigate(`/app/recite/${currentChunk.id}`);
+  }
+
+  async function dismissRecitePrompt() {
+    if (!currentChunk) return;
+    setShowRecitePrompt(false);
+    await localEntities.Chunk.update(currentChunk.id, { recite_prompt_dismissed: true });
+    setChunks((prev) =>
+      prev.map((c) => (c.id === currentChunk.id ? { ...c, recite_prompt_dismissed: true } : c))
+    );
   }
 
   // ── Derived data ─────────────────────────────────────────────────
@@ -358,6 +403,8 @@ export default function Home() {
 
   const t = useThemeColors();
   const isActive = playbackState === "playing" || playbackState === "paused";
+  const canRecite = recordings.length > 0 && !!selectedRecordingId;
+  const reciteLabel = currentChunk?.status === "completed" ? "Re-test" : "Recite";
 
   if (loading || settingsLoading) {
     return (
@@ -393,6 +440,17 @@ export default function Home() {
       </div>
 
       {/* Zone 3 — Luxury Verse Stack */}
+      {showRecitePrompt && (
+        <div className="mx-4 mt-2 rounded-2xl border border-[#D4AF3766] bg-[#0E5B3D] p-3 text-[#F2D675]">
+          <p className="text-sm font-semibold">💡 You've listened to this chunk {(currentChunk?.listen_count || 0)} times!</p>
+          <p className="text-xs text-[#E9D8A6] mt-1">Ready to test your memorization?</p>
+          <div className="mt-2 flex gap-2">
+            <button onClick={handleRecite} className="h-9 px-3 rounded-lg bg-[#D4AF37] text-[#2B241B] text-sm font-semibold">🧠 Test Myself</button>
+            <button onClick={dismissRecitePrompt} className="h-9 px-3 rounded-lg border border-[#D4AF37] text-[#F2D675] text-sm">Later</button>
+          </div>
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
         <motion.div
           key={currentChunkIndex}
@@ -441,7 +499,10 @@ export default function Home() {
         hasRecording={recordings.length > 0 && !!selectedRecordingId}
         selectedRecordingName={selectedRecording?.name}
         selectedRecordingDuration={selectedRecording ? fmtMs(selectedRecording.total_duration_ms) : null}
+        canRecite={canRecite}
+        reciteLabel={reciteLabel}
         onRecord={handleRecord}
+        onRecite={handleRecite}
         onPlay={startPlayback}
         onPause={handlePause}
         onResume={handleResume}

@@ -54,12 +54,17 @@
     },
     "default_verse_repetition": {
       "type": "number",
-      "default": 3
+      "default": 1
     },
     "default_chunk_repetition": {
       "type": "number",
-      "default": 1,
+      "default": 0,
       "description": "0 means infinite"
+    },
+    "recite_prompt_threshold": {
+      "type": "number",
+      "default": 10,
+      "description": "N listens before prompting user to test memorization"
     },
     "last_chunk_id": {
       "type": "string",

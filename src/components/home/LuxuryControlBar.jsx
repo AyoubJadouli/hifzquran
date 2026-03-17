@@ -1,7 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useThemeColors } from "../useThemeColors";
-import { Mic, Play, Pause, Square, MoreVertical, Music } from "lucide-react";
+import { Mic, Play, Pause, Square, MoreVertical, Music, Brain } from "lucide-react";
 
 const goldGradient =
   "linear-gradient(160deg, #E7C86A 0%, #D8B24A 30%, #C9971E 70%, #A07A18 100%)";
@@ -49,7 +49,10 @@ export default function LuxuryControlBar({
   hasRecording,
   selectedRecordingName,
   selectedRecordingDuration,
+  canRecite,
+  reciteLabel,
   onRecord,
+  onRecite,
   onPlay,
   onPause,
   onResume,
@@ -88,6 +91,13 @@ export default function LuxuryControlBar({
           <Mic className="w-5 h-5" style={{ color: "#2B241B" }} />
           <span className="text-[10px] font-inter font-bold" style={{ color: "#2B241B" }}>
             Record
+          </span>
+        </PremiumButton>
+
+        <PremiumButton onClick={onRecite} disabled={!canRecite} gradient={goldGradient} shadow={goldShadow}>
+          <Brain className="w-5 h-5" style={{ color: "#2B241B" }} />
+          <span className="text-[10px] font-inter font-bold" style={{ color: "#2B241B" }}>
+            {reciteLabel || "Recite"}
           </span>
         </PremiumButton>
 

@@ -10,8 +10,9 @@ const DEFAULT_SETTINGS = {
   show_transliteration: true,
   show_translation: true,
   default_speed: 1.0,
-  default_verse_repetition: 3,
-  default_chunk_repetition: 1,
+  default_verse_repetition: 1,
+  default_chunk_repetition: 0,
+  recite_prompt_threshold: 10,
   last_chunk_id: null,
   last_surah_number: null,
 };

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { localEntities } from "../components/localData";
 import { fetchSurahVerses, generateChunks } from "../components/quranData";
 import { useSettings } from "../components/useSettings";
-import { ArrowLeft, Mic, Play, Loader2, CheckCircle2, Circle, Clock } from "lucide-react";
+import { ArrowLeft, Mic, Play, Loader2, CheckCircle2, Circle, Clock, Brain } from "lucide-react";
 import { motion } from "framer-motion";
 import { useThemeColors } from "../components/useThemeColors";
 
@@ -151,7 +151,7 @@ export default function SurahDetail() {
                   <div className="flex gap-2">
                     <motion.button
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => navigate(`/Record?chunkId=${chunk.id}`)}
+                      onClick={() => navigate(`/app/Record?chunkId=${chunk.id}`)}
                       className="w-9 h-9 rounded-full flex items-center justify-center"
                       style={{
                         background: t.greenBtnBg,
@@ -160,6 +160,21 @@ export default function SurahDetail() {
                       }}
                     >
                       <Mic className="w-4 h-4" style={{ color: t.gold }} />
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => navigate(`/app/recite/${chunk.id}`)}
+                      disabled={chunk.status !== "completed" && chunk.status !== "in_progress"}
+                      className="w-9 h-9 rounded-full flex items-center justify-center"
+                      style={{
+                        background: t.goldGradient,
+                        border: `1px solid ${t.goldDark}`,
+                        boxShadow: t.goldShadow,
+                        opacity: chunk.status !== "completed" && chunk.status !== "in_progress" ? 0.45 : 1,
+                      }}
+                      title={chunk.status !== "completed" && chunk.status !== "in_progress" ? "Record first, then test yourself" : "Recite"}
+                    >
+                      <Brain className="w-4 h-4" style={{ color: "#2B241B" }} />
                     </motion.button>
                     <motion.button
                       whileTap={{ scale: 0.9 }}

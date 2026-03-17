@@ -14,8 +14,12 @@ export default function AppLayout() {
   const location = useLocation();
   const t = useThemeColors();
 
-  // Hide nav on record page
-  const hideNav = location.pathname.startsWith("/Record");
+  // Hide nav on immersive pages
+  const hideNav =
+    location.pathname.startsWith("/app/Record") ||
+    location.pathname.startsWith("/app/recite/") ||
+    location.pathname.startsWith("/Record") ||
+    location.pathname.startsWith("/recite/");
 
   return (
     <div className="flex flex-col h-screen bg-background">

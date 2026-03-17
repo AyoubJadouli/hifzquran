@@ -12,6 +12,7 @@ import SurahDetail from "./pages/SurahDetail";
 import Progress from "./pages/Progress";
 import AppSettings from "./pages/AppSettings";
 import Record from "./pages/Record";
+import Recite from "./pages/Recite";
 import PageNotFound from "./lib/PageNotFound";
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="Progress" element={<Progress />} />
             <Route path="AppSettings" element={<AppSettings />} />
             <Route path="Record" element={<Record />} />
+            <Route path="recite/:chunkId" element={<Recite />} />
           </Route>
 
           {/* Backward compatibility for old routes */}
@@ -44,6 +46,7 @@ export default function App() {
           <Route path="/Progress" element={<Navigate to="/app/Progress" replace />} />
           <Route path="/AppSettings" element={<Navigate to="/app/AppSettings" replace />} />
           <Route path="/Record" element={<Navigate to="/app/Record" replace />} />
+          <Route path="/recite/:chunkId" element={<Navigate to="/app/recite/:chunkId" replace />} />
 
           <Route path="*" element={<PageNotFound />} />
         </Routes>

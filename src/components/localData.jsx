@@ -82,5 +82,6 @@ function makeEntity(name) {
 export const localEntities = {
   Chunk: makeEntity('Chunk'),
   Recording: makeEntity('Recording'),
+  RecitationAttempt: makeEntity('RecitationAttempt'),
   UserSettings: makeEntity('UserSettings'),
 };

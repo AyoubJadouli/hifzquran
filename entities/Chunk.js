@@ -32,6 +32,30 @@
       "type": "string",
       "format": "date-time",
       "description": "Last time this chunk was accessed"
+    },
+    "recitation_attempts": {
+      "type": "number",
+      "default": 0,
+      "description": "How many recite/validate attempts were made"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When chunk was validated as completed"
+    },
+    "last_recitation_attempt_id": {
+      "type": "string",
+      "description": "Reference to latest recitation attempt"
+    },
+    "listen_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many listening sessions were started for this chunk"
+    },
+    "recite_prompt_dismissed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the test-yourself prompt was dismissed"
     }
   },
   "required": [
