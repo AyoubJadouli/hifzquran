@@ -37,7 +37,10 @@ jobs:
         env:
           NODE_ENV: development
           NPM_CONFIG_PRODUCTION: "false"
-        run: npm ci --include=dev
+        run: npm ci --include=dev --no-audit
+
+      - name: Ensure Vite toolchain is present
+        run: npm ls vite @vitejs/plugin-react || npm install --no-save vite @vitejs/plugin-react
 
       - name: Verify Vite is installed
         run: npx vite --version
