@@ -38,9 +38,6 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Verify Vite exists
-        run: test -x node_modules/.bin/vite
-
       - name: Build app
         run: npm run build
 
@@ -60,6 +57,8 @@ jobs:
         run: |
           ls -la /home/runner/.npm/_logs || true
           cat /home/runner/.npm/_logs/* || true
+          ls -la node_modules || true
+          ls -la node_modules/.bin || true
 
   deploy:
     environment:
