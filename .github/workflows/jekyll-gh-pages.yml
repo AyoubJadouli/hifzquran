@@ -2,6 +2,8 @@ name: Deploy to GitHub Pages
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  NPM_CONFIG_PRODUCTION: "false"
+  NPM_CONFIG_OMIT: ""
 
 on:
   push:
@@ -34,14 +36,12 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Install dependencies
-        env:
-          NODE_ENV: development
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Build app
-        env:
-          NODE_ENV: development
         run: |
+          npm config get production
+          npm config get omit
           test -f node_modules/vite/package.json
           test -f node_modules/@vitejs/plugin-react/package.json
           ./node_modules/.bin/vite --version
