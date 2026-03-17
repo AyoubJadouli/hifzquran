@@ -20,6 +20,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      npm_config_loglevel: error
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -33,12 +36,14 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Clean npm cache
+        run: npm cache clean --force
+
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
+        run: npm install --include=dev --no-audit --no-fund
 
       - name: Build app
-        run: |
-          npm run build
+        run: npm exec vite build
 
       - name: SPA fallback
         run: cp dist/index.html dist/404.html
