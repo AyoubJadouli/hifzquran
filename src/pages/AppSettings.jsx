@@ -1,5 +1,10 @@
 import React from "react";
 import { useSettings } from "../components/useSettings";
+import {
+  SUPPORTED_RIWAYAT,
+  SUPPORTED_TRANSLITERATION_LANGUAGES,
+  SUPPORTED_TRANSLITERATION_SOURCES,
+} from "../components/quranData";
 // No server needed — all data is stored locally in the browser
 import { useTheme } from "../components/ThemeContext";
 import { useThemeColors } from "../components/useThemeColors";
@@ -11,6 +16,18 @@ const LANGUAGES = {
   en: "English", ar: "العربية", fr: "Français", es: "Español",
   de: "Deutsch", tr: "Türkçe", ur: "اردو", id: "Bahasa Indonesia",
 };
+
+const RIWAYAT = Object.fromEntries(
+  Object.entries(SUPPORTED_RIWAYAT).map(([key, value]) => [key, value.label])
+);
+
+const TRANSLITERATION_LANGUAGES = Object.fromEntries(
+  Object.entries(SUPPORTED_TRANSLITERATION_LANGUAGES).map(([key, value]) => [key, value.label])
+);
+
+const TRANSLITERATION_SOURCES = Object.fromEntries(
+  Object.entries(SUPPORTED_TRANSLITERATION_SOURCES).map(([key, value]) => [key, value.label])
+);
 
 const HIFZ_ORDERS = {
   forward: "Forward (Al-Fatiha → An-Nas)",
@@ -119,11 +136,32 @@ export default function AppSettings() {
 
         {/* Display */}
         <LuxSection title="Display" t={t}>
+          <LuxRow label="Riwaya" t={t}>
+            <LuxSelect value={settings.quran_riwaya} onChange={v => updateSettings({ quran_riwaya: v })} t={t} wide>
+              {Object.entries(RIWAYAT).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
+            </LuxSelect>
+          </LuxRow>
           <LuxRow label="Language" t={t}>
             <LuxSelect value={settings.display_language} onChange={v => updateSettings({ display_language: v })} t={t} wide>
               {Object.entries(LANGUAGES).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
             </LuxSelect>
           </LuxRow>
+          <LuxRow label="Translit. Language" t={t}>
+            <LuxSelect value={settings.transliteration_language} onChange={v => updateSettings({ transliteration_language: v })} t={t} wide>
+              {Object.entries(TRANSLITERATION_LANGUAGES).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
+            </LuxSelect>
+          </LuxRow>
+          <LuxRow label="Translit. Source" t={t}>
+            <LuxSelect value={settings.transliteration_source} onChange={v => updateSettings({ transliteration_source: v })} t={t} wide>
+              {Object.entries(TRANSLITERATION_SOURCES).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
+            </LuxSelect>
+          </LuxRow>
+          <LuxSwitchRow
+            label="Offline Transliteration Packs"
+            checked={settings.offline_download_transliteration}
+            onChange={v => updateSettings({ offline_download_transliteration: v })}
+            t={t}
+          />
           <LuxSwitchRow label="Show Arabic" checked={settings.show_arabic} onChange={v => updateSettings({ show_arabic: v })} t={t} />
           <LuxSwitchRow label="Show Transliteration" checked={settings.show_transliteration} onChange={v => updateSettings({ show_transliteration: v })} t={t} />
           <LuxSwitchRow label="Show Translation" checked={settings.show_translation} onChange={v => updateSettings({ show_translation: v })} t={t} />

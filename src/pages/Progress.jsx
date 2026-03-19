@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { localEntities } from "../components/localData";
+import { getAppT } from "../components/appI18n";
+import { useSettings } from "../components/useSettings";
 import { Loader2, Headphones, Flame, Zap, Trophy, Clock, BookOpen } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
 import { useThemeColors } from "../components/useThemeColors";
@@ -38,6 +40,8 @@ function SectionTitle({ children, t }) {
 
 export default function Progress() {
   const t = useThemeColors();
+  const { settings } = useSettings();
+  const i18n = getAppT(settings.display_language);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -95,10 +99,10 @@ export default function Progress() {
         {/* Header */}
         <div className="text-center pt-2 pb-2">
           <p className="font-amiri" style={{ fontSize: "22px", color: t.goldLight, textShadow: `0 0 18px rgba(212,175,55,0.35)` }}>
-            Your Quran Progress
+            {i18n.progressHeaderTitle}
           </p>
           <p className="font-inter" style={{ fontSize: "12px", color: t.textMuted, marginTop: "2px" }}>
-            Consistency is the key to Hifz
+            {i18n.progressHeaderSubtitle}
           </p>
         </div>
 
@@ -119,7 +123,7 @@ export default function Progress() {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="font-inter font-bold" style={{ fontSize: "26px", color: t.goldLight }}>{(progress * 100).toFixed(1)}%</span>
-              <span className="font-inter" style={{ fontSize: "10px", color: t.textMuted }}>Complete</span>
+              <span className="font-inter" style={{ fontSize: "10px", color: t.textMuted }}>{i18n.progressComplete}</span>
               <span className="font-inter" style={{ fontSize: "9px", color: t.textMuted, marginTop: "1px" }}>{stats.versesLearned}/{TOTAL_QURAN_VERSES}</span>
             </div>
           </div>
@@ -127,13 +131,13 @@ export default function Progress() {
 
         {/* Stats Cards */}
         <div>
-          <SectionTitle t={t}>Progress Stats</SectionTitle>
+          <SectionTitle t={t}>{i18n.progressStatsTitle}</SectionTitle>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { icon: Clock, label: "Total Listening", value: formatDuration(stats.totalListeningMs) },
-              { icon: Flame, label: "Current Streak", value: `${stats.streak} days` },
-              { icon: Zap, label: "Recordings", value: String(stats.totalRecordings) },
-              { icon: Trophy, label: "Completed", value: `${stats.completedChunks} chunks` },
+              { icon: Clock, label: i18n.progressTotalListening, value: formatDuration(stats.totalListeningMs, i18n) },
+              { icon: Flame, label: i18n.progressCurrentStreak, value: i18n.progressDaysValue({ count: stats.streak }) },
+              { icon: Zap, label: i18n.progressRecordings, value: String(stats.totalRecordings) },
+              { icon: Trophy, label: i18n.progressCompleted, value: i18n.progressChunksValue({ count: stats.completedChunks }) },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="rounded-2xl p-4 relative overflow-hidden"
                 style={{ background: t.statCardBg, boxShadow: `0 4px 18px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.2)` }}>
@@ -149,7 +153,7 @@ export default function Progress() {
 
         {/* Surah Progress */}
         <div>
-          <SectionTitle t={t}>Surah Progress</SectionTitle>
+          <SectionTitle t={t}>{i18n.progressSurahProgress}</SectionTitle>
           <div className="rounded-2xl p-4 space-y-3" style={{ background: t.chartBg, border: `1px solid ${t.chartBorder}`, boxShadow: t.cardShadow }}>
             {SURAH_SAMPLES.map(({ name, pct }) => (
               <div key={name} className="space-y-1">
@@ -175,7 +179,7 @@ export default function Progress() {
 
         {/* Bar Chart */}
         <div>
-          <SectionTitle t={t}>Daily Recitations</SectionTitle>
+          <SectionTitle t={t}>{i18n.progressDailyRecitations}</SectionTitle>
           <div className="rounded-2xl p-4" style={{ background: t.chartBg, border: `1px solid ${t.chartBorder}`, boxShadow: t.cardShadow }}>
             <ResponsiveContainer width="100%" height={140}>
               <BarChart data={DAY_DATA} barSize={22}>
@@ -196,7 +200,7 @@ export default function Progress() {
 
         {/* Line Chart */}
         <div>
-          <SectionTitle t={t}>Streak Over Time</SectionTitle>
+          <SectionTitle t={t}>{i18n.progressStreakOverTime}</SectionTitle>
           <div className="rounded-2xl p-4" style={{ background: t.chartBg, border: `1px solid ${t.chartBorder}`, boxShadow: t.cardShadow }}>
             <ResponsiveContainer width="100%" height={130}>
               <LineChart data={STREAK_DATA}>
@@ -214,12 +218,12 @@ export default function Progress() {
 
         {/* Activity Summary */}
         <div>
-          <SectionTitle t={t}>Activity Summary</SectionTitle>
+          <SectionTitle t={t}>{i18n.progressActivitySummary}</SectionTitle>
           <div className="rounded-2xl p-4 space-y-3" style={{ background: t.chartBg, border: `1px solid ${t.chartBorder}` }}>
             {[
-              { label: "In Progress", value: `${stats.inProgressChunks} chunks`, color: t.goldLight },
-              { label: "Completed", value: `${stats.completedChunks} chunks`, color: "#2ecc71" },
-              { label: "Total Recordings", value: `${stats.totalRecordings}`, color: t.textPrimary },
+              { label: i18n.progressInProgress, value: i18n.progressChunksValue({ count: stats.inProgressChunks }), color: t.goldLight },
+              { label: i18n.progressCompleted, value: i18n.progressChunksValue({ count: stats.completedChunks }), color: "#2ecc71" },
+              { label: i18n.progressTotalRecordings, value: `${stats.totalRecordings}`, color: t.textPrimary },
             ].map(({ label, value, color }, i, arr) => (
               <React.Fragment key={label}>
                 <div className="flex justify-between items-center">
@@ -238,7 +242,7 @@ export default function Progress() {
           <div className="absolute top-0 left-0 right-0 pointer-events-none"
             style={{ height: "40%", background: "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%)", borderRadius: "14px 14px 0 0" }} />
           <p className="font-inter italic relative z-10" style={{ fontSize: "13px", color: t.tipText, lineHeight: 1.65 }}>
-            ✨ "Consistency is the key to Hifz. Keep going, and Allah will guide you!"
+            {i18n.progressTip}
           </p>
         </div>
 
@@ -247,11 +251,11 @@ export default function Progress() {
   );
 }
 
-function formatDuration(ms) {
-  if (!ms) return "0m";
+function formatDuration(ms, i18n) {
+  if (!ms) return i18n.progressMinutesShort({ minutes: 0 });
   const totalMinutes = Math.floor(ms / 60000);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
+  if (hours > 0) return i18n.progressHoursMinutesShort({ hours, minutes });
+  return i18n.progressMinutesShort({ minutes });
 }

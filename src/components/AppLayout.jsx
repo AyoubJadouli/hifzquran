@@ -1,18 +1,22 @@
 import React from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useThemeColors } from "./useThemeColors";
+import { getAppT } from "./appI18n";
+import { useSettings } from "./useSettings";
 import { Home, BookOpen, BarChart3, Settings } from "lucide-react";
-
-const NAV_ITEMS = [
-  { path: "/Home", icon: Home, label: "Home" },
-  { path: "/Surahs", icon: BookOpen, label: "Surahs" },
-  { path: "/Progress", icon: BarChart3, label: "Progress" },
-  { path: "/AppSettings", icon: Settings, label: "Settings" },
-];
 
 export default function AppLayout() {
   const location = useLocation();
   const t = useThemeColors();
+  const { settings } = useSettings();
+  const i18n = getAppT(settings.display_language);
+
+  const NAV_ITEMS = [
+    { path: "/Home", icon: Home, label: i18n.navHome },
+    { path: "/Surahs", icon: BookOpen, label: i18n.navSurahs },
+    { path: "/Progress", icon: BarChart3, label: i18n.navProgress },
+    { path: "/AppSettings", icon: Settings, label: i18n.navSettings },
+  ];
 
   // Hide nav on immersive pages
   const hideNav =

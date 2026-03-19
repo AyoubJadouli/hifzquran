@@ -38,15 +38,15 @@ export default function LandingPage() {
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link to="/app/Home" className="px-5 py-3 rounded-xl bg-[#D4AF37] text-[#2B241B] font-semibold">{t.openApp}</Link>
           <Link to={`/${lang}/features`} className="px-5 py-3 rounded-xl border border-[#D4AF37] font-semibold">{t.features}</Link>
-          <a href="https://makne.app" target="_blank" rel="noreferrer" className="px-5 py-3 rounded-xl border border-[#F2D675]/50">Visit Makne.app</a>
+          <a href="https://makne.app" target="_blank" rel="noreferrer" className="px-5 py-3 rounded-xl border border-[#F2D675]/50">{t.visitMakne}</a>
         </div>
       </section>
 
       <section className="grid md:grid-cols-3 gap-4 mt-8">
         {[
-          ["Smart Chunking", "Split surahs into practical memorization blocks with overlap for retention."],
-          ["Recitation Recording", "Record every verse and review quality before finalizing your session."],
-          ["Progress Intelligence", "Track streaks, completion, and daily consistency for long-term Hifz success."],
+          [t.smartChunking, t.smartChunkingDesc],
+          [t.recitationRecording, t.recitationRecordingDesc],
+          [t.progressIntelligence, t.progressIntelligenceDesc],
         ].map(([title, body]) => (
           <article key={title} className="rounded-2xl border border-[#D4AF37]/30 p-5 bg-[#0E5B3D]">
             <h2 className="text-xl font-semibold text-[#F2D675]">{title}</h2>

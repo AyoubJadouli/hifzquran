@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchSurahList } from "../components/quranData";
+import { getAppT } from "../components/appI18n";
+import { useSettings } from "../components/useSettings";
 import { Search, ChevronRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useThemeColors } from "../components/useThemeColors";
@@ -8,6 +10,8 @@ import { useThemeColors } from "../components/useThemeColors";
 export default function Surahs() {
   const navigate = useNavigate();
   const t = useThemeColors();
+  const { settings } = useSettings();
+  const i18n = getAppT(settings.display_language);
   const [surahs, setSurahs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -52,10 +56,10 @@ export default function Surahs() {
             قائمة السور
           </p>
           <p className="font-inter font-bold text-center" style={{ fontSize: "15px", color: t.textOnDark, marginTop: "2px" }}>
-            Surahs List
+            {i18n.navSurahs}
           </p>
           <p className="font-inter text-center" style={{ fontSize: "11px", color: t.headerSubtext, marginTop: "2px" }}>
-            {surahs.length} surahs · 6,236 verses
+            {i18n.surahsHeaderStats({ surahCount: surahs.length, verseCount: "6,236" })}
           </p>
 
           {/* Search bar */}
@@ -64,7 +68,7 @@ export default function Surahs() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search surahs..."
+              placeholder={i18n.commonSearchSurahs}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl font-inter text-sm outline-none"
               style={{
                 background: "rgba(0,0,0,0.2)",
@@ -115,7 +119,7 @@ export default function Surahs() {
                 <div className="flex-1 min-w-0">
                   <p className="font-inter font-semibold" style={{ fontSize: "13px", color: t.textPrimary }}>{surah.name_english}</p>
                   <p className="font-inter" style={{ fontSize: "10.5px", color: t.textMuted, marginTop: "1px" }}>
-                    {surah.name_translation} · {surah.total_verses} verses
+                    {surah.name_translation} · {i18n.commonVerseCount({ count: surah.total_verses })}
                   </p>
                   <div className="mt-1.5 rounded-full overflow-hidden" style={{ height: "3px", background: `rgba(212,175,55,0.12)` }}>
                     <div className="h-full rounded-full" style={{ width: "0%", background: `linear-gradient(90deg, ${t.gold}, ${t.goldLight})` }} />

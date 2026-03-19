@@ -1,7 +1,19 @@
 // Quran data fetching utilities using Al-Quran Cloud API
 const API_BASE = "https://api.alquran.cloud/v1";
-const ARABIC_WARSH_EDITION = "ar.warsh";
-const ARABIC_FALLBACK_EDITION = "ar.alafasy";
+
+const RIWAYA_EDITIONS = {
+  warsh: ["ar.warsh", "ar.alafasy"],
+  hafs: ["quran-uthmani", "ar.alafasy"],
+  qalun: ["ar.qaloun", "quran-uthmani", "ar.alafasy"],
+  al_duri: ["ar.douri", "quran-uthmani", "ar.alafasy"],
+};
+
+export const SUPPORTED_RIWAYAT = {
+  warsh: { id: "warsh", label: "Warsh ʿan Nāfiʿ", shortLabel: "Warsh" },
+  hafs: { id: "hafs", label: "Ḥafṣ ʿan ʿĀṣim", shortLabel: "Hafs" },
+  qalun: { id: "qalun", label: "Qālūn ʿan Nāfiʿ", shortLabel: "Qalun" },
+  al_duri: { id: "al_duri", label: "Al-Dūrī ʿan Abī ʿAmr", shortLabel: "Al-Duri" },
+};
 
 const TRANSLATION_EDITIONS = {
   en: "en.asad",
@@ -13,7 +25,23 @@ const TRANSLATION_EDITIONS = {
   ar: null,
 };
 
-const TRANSLITERATION_EDITION = "en.transliteration";
+const TRANSLITERATION_EDITIONS = {
+  standard: {
+    en: "en.transliteration",
+  },
+  simplified: {
+    en: "en.transliteration",
+  },
+};
+
+export const SUPPORTED_TRANSLITERATION_SOURCES = {
+  standard: { id: "standard", label: "Standard Transliteration" },
+  simplified: { id: "simplified", label: "Simplified Transliteration" },
+};
+
+export const SUPPORTED_TRANSLITERATION_LANGUAGES = {
+  en: { id: "en", label: "English Transliteration" },
+};
 
 // In-memory cache
 const cache = {
@@ -49,7 +77,7 @@ export async function fetchSurahList() {
 }
 
 export async function fetchSurahVerses(surahNumber, language = "en") {
-  return fetchSurahVersesForLanguage(surahNumber, language);
+  return fetchSurahVersesForLanguage(surahNumber, language, "warsh");
 }
 
 async function fetchEditionJson(url) {
@@ -58,26 +86,50 @@ async function fetchEditionJson(url) {
   return res.json();
 }
 
-export async function fetchSurahVersesForLanguage(surahNumber, language = "en") {
+async function fetchFirstAvailableEdition(surahNumber, editions) {
+  let lastError = null;
+  for (const edition of editions) {
+    try {
+      return await fetchEditionJson(`${API_BASE}/surah/${surahNumber}/${edition}`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error(`No edition available for surah ${surahNumber}`);
+}
+
+function getTransliterationEdition(language = "en", source = "standard") {
+  const sourceMap = TRANSLITERATION_EDITIONS[source] || TRANSLITERATION_EDITIONS.standard;
+  return sourceMap[language] || TRANSLITERATION_EDITIONS.standard.en;
+}
+
+export async function fetchSurahVersesForLanguage(
+  surahNumber,
+  language = "en",
+  riwaya = "warsh",
+  transliterationLanguage = "en",
+  transliterationSource = "standard"
+) {
   const lang = TRANSLATION_EDITIONS[language] ? language : "en";
-  const cacheKey = `${surahNumber}_${lang}`;
+  const riwayaKey = RIWAYA_EDITIONS[riwaya] ? riwaya : "warsh";
+  const translitLang = SUPPORTED_TRANSLITERATION_LANGUAGES[transliterationLanguage] ? transliterationLanguage : "en";
+  const translitSource = SUPPORTED_TRANSLITERATION_SOURCES[transliterationSource] ? transliterationSource : "standard";
+  const cacheKey = `${surahNumber}_${lang}_${riwayaKey}_${translitLang}_${translitSource}`;
   if (cache.surahsByLang[cacheKey]) return cache.surahsByLang[cacheKey];
-  const lsKey = `quran_surah_${surahNumber}_${lang}`;
+  const lsKey = `quran_surah_${surahNumber}_${lang}_${riwayaKey}_${translitLang}_${translitSource}`;
   const cached = lsGet(lsKey);
   if (cached) {
     cache.surahsByLang[cacheKey] = cached;
     return cached;
   }
 
-  // Fetch Arabic (Warsh preferred), translation, and transliteration in parallel
+  // Fetch Arabic by chosen riwaya, translation, and transliteration in parallel
   const [arabicData, translationData, transliterationData] = await Promise.all([
-    fetchEditionJson(`${API_BASE}/surah/${surahNumber}/${ARABIC_WARSH_EDITION}`).catch(() =>
-      fetchEditionJson(`${API_BASE}/surah/${surahNumber}/${ARABIC_FALLBACK_EDITION}`)
-    ),
+    fetchFirstAvailableEdition(surahNumber, RIWAYA_EDITIONS[riwayaKey]),
     lang === "ar"
       ? Promise.resolve({ data: { ayahs: [] } })
       : fetchEditionJson(`${API_BASE}/surah/${surahNumber}/${TRANSLATION_EDITIONS[lang]}`),
-    fetchEditionJson(`${API_BASE}/surah/${surahNumber}/${TRANSLITERATION_EDITION}`).catch(() =>
+    fetchEditionJson(`${API_BASE}/surah/${surahNumber}/${getTransliterationEdition(translitLang, translitSource)}`).catch(() =>
       Promise.resolve({ data: { ayahs: [] } })
     ),
   ]);
@@ -97,6 +149,9 @@ export async function fetchSurahVersesForLanguage(surahNumber, language = "en") 
     name_translation: arabicData.data.englishNameTranslation,
     total_verses: arabicData.data.numberOfAyahs,
     revelation_type: arabicData.data.revelationType,
+    riwaya: riwayaKey,
+    transliteration_language: translitLang,
+    transliteration_source: translitSource,
     verses,
   };
 
@@ -106,24 +161,50 @@ export async function fetchSurahVersesForLanguage(surahNumber, language = "en") 
   return surahPayload;
 }
 
-export async function prefetchAllQuranData(languages = ["en"]) {
+export async function prefetchAllQuranData(
+  languages = ["en"],
+  riwayat = ["warsh"],
+  transliterationLanguages = ["en"],
+  transliterationSources = ["standard"]
+) {
   const langs = Array.from(new Set(languages.filter(l => TRANSLATION_EDITIONS[l] || l === "ar")));
+  const selectedRiwayat = Array.from(new Set(riwayat.filter(r => RIWAYA_EDITIONS[r])));
+  const selectedTranslitLangs = Array.from(new Set(transliterationLanguages.filter(l => SUPPORTED_TRANSLITERATION_LANGUAGES[l])));
+  const selectedTranslitSources = Array.from(new Set(transliterationSources.filter(s => SUPPORTED_TRANSLITERATION_SOURCES[s])));
   let completed = 0;
-  const total = 114 * langs.length;
+  const total = 114 * langs.length * selectedRiwayat.length * selectedTranslitLangs.length * selectedTranslitSources.length;
 
-  for (const lang of langs) {
-    for (let surah = 1; surah <= 114; surah++) {
-      await fetchSurahVersesForLanguage(surah, lang);
-      completed += 1;
+  for (const riwaya of selectedRiwayat) {
+    for (const lang of langs) {
+      for (const translitLang of selectedTranslitLangs) {
+        for (const translitSource of selectedTranslitSources) {
+          for (let surah = 1; surah <= 114; surah++) {
+            await fetchSurahVersesForLanguage(surah, lang, riwaya, translitLang, translitSource);
+            completed += 1;
+          }
+        }
+      }
     }
   }
 
-  return { completed, total, languages: langs };
+  return {
+    completed,
+    total,
+    languages: langs,
+    riwayat: selectedRiwayat,
+    transliterationLanguages: selectedTranslitLangs,
+    transliterationSources: selectedTranslitSources,
+  };
 }
 
-export async function prefetchFullQuranWarsh(language = "en") {
+export async function prefetchFullQuranWarsh(
+  language = "en",
+  riwaya = "warsh",
+  transliterationLanguage = "en",
+  transliterationSource = "standard"
+) {
   const lang = TRANSLATION_EDITIONS[language] ? language : "en";
-  return prefetchAllQuranData([lang]);
+  return prefetchAllQuranData([lang], [riwaya], [transliterationLanguage], [transliterationSource]);
 }
 
 export function generateChunks(totalVerses, chunkSize, overlap) {

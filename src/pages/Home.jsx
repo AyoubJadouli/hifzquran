@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { localEntities } from "../components/localData";
 import { resolveAudioUrl } from "../components/fileStorage";
-import { fetchSurahVerses, generateChunks, prefetchFullQuranWarsh } from "../components/quranData";
+import { fetchSurahVersesForLanguage, generateChunks, prefetchAllQuranData } from "../components/quranData";
 import { useSettings } from "../components/useSettings";
 import ChunkHeader from "../components/home/ChunkHeader";
 import { useThemeColors } from "../components/useThemeColors";
@@ -68,10 +68,22 @@ export default function Home() {
       setChunkRepetition(settings.default_chunk_repetition ?? 0);
       loadInitialData();
 
-      // Warm up local cache with full Quran in Warsh riwaya (non-blocking)
-      const prefetchKey = `hifz_prefetched_full_warsh_${settings.display_language || "en"}`;
+      // Warm up local cache with major riwayat and current translation language (non-blocking)
+      const prefetchRiwayat = ["warsh", "hafs", "qalun", "al_duri"];
+      const transliterationLanguages = settings.offline_download_transliteration
+        ? [settings.transliteration_language || "en"]
+        : ["en"];
+      const transliterationSources = settings.offline_download_transliteration
+        ? [settings.transliteration_source || "standard"]
+        : ["standard"];
+      const prefetchKey = `hifz_prefetched_full_${settings.display_language || "en"}_${prefetchRiwayat.join("_")}`;
       if (!localStorage.getItem(prefetchKey)) {
-        prefetchFullQuranWarsh(settings.display_language || "en")
+        prefetchAllQuranData(
+          [settings.display_language || "en"],
+          prefetchRiwayat,
+          transliterationLanguages,
+          transliterationSources
+        )
           .then(() => {
             localStorage.setItem(prefetchKey, "1");
           })
@@ -80,7 +92,7 @@ export default function Home() {
           });
       }
     }
-  }, [settingsLoading, settings.display_language]);
+  }, [settingsLoading, settings.display_language, settings.quran_riwaya]);
 
   // Refresh recordings when returning from Record page
   useEffect(() => {
@@ -116,7 +128,13 @@ export default function Home() {
   async function loadInitialData() {
     setLoading(true);
     const surahNum = settings.last_surah_number || 1;
-    const surahData = await fetchSurahVerses(surahNum, settings.display_language || "en");
+    const surahData = await fetchSurahVersesForLanguage(
+      surahNum,
+      settings.display_language || "en",
+      settings.quran_riwaya || "warsh"
+      ,settings.transliteration_language || "en"
+      ,settings.transliteration_source || "standard"
+    );
     setSurah(surahData);
 
     const chunkSize = settings.chunk_size || 7;
@@ -182,7 +200,13 @@ export default function Home() {
   async function loadSurah(surahNum) {
     stopPlayback();
     setLoading(true);
-    const surahData = await fetchSurahVerses(surahNum, settings.display_language || "en");
+    const surahData = await fetchSurahVersesForLanguage(
+      surahNum,
+      settings.display_language || "en",
+      settings.quran_riwaya || "warsh"
+      ,settings.transliteration_language || "en"
+      ,settings.transliteration_source || "standard"
+    );
     setSurah(surahData);
 
     const chunkSize = settings.chunk_size || 7;

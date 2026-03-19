@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 33% 97%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 161 78% 21%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 43 65% 53%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 30 20% 93%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 43 65% 53%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 10% 88%;
+    --input: 30 10% 88%;
+    --ring: 161 78% 21%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 160 20% 7%;
+    --foreground: 0 0% 93%;
+    --card: 160 15% 11%;
+    --card-foreground: 0 0% 93%;
+    --popover: 160 15% 11%;
+    --popover-foreground: 0 0% 93%;
+    --primary: 161 60% 40%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 43 65% 40%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 160 10% 16%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 43 65% 40%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 40%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 160 10% 20%;
+    --input: 160 10% 20%;
+    --ring: 161 60% 40%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* Hide scrollbar */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe area padding for mobile */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Islamic luxury parchment background */
+.bg-parchment {
+  background-color: #F8F3E8;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cpath d='M28 4 L30 24 L50 26 L30 28 L28 50 L26 28 L6 26 L26 24 Z' fill='%23B8A87A' fill-opacity='0.08'/%3E%3C/svg%3E");
+  background-size: 56px 56px;
+}

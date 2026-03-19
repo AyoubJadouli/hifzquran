@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { localEntities } from "../components/localData";
 import { fetchSurahVerses, generateChunks } from "../components/quranData";
+import { getAppT } from "../components/appI18n";
 import { useSettings } from "../components/useSettings";
 import { ArrowLeft, Mic, Play, Loader2, CheckCircle2, Circle, Clock, Brain } from "lucide-react";
 import { motion } from "framer-motion";
@@ -13,6 +14,7 @@ export default function SurahDetail() {
   const params = new URLSearchParams(window.location.search);
   const surahId = parseInt(params.get("id") || "1");
   const { settings, updateSettings } = useSettings();
+  const i18n = getAppT(settings.display_language);
 
   const [surah, setSurah] = useState(null);
   const [chunks, setChunks] = useState([]);
@@ -79,14 +81,14 @@ export default function SurahDetail() {
             >
               <ArrowLeft className="w-4 h-4" style={{ color: t.gold }} />
             </motion.button>
-            <span className="font-inter text-sm" style={{ color: t.headerSubtext }}>Back to Surahs</span>
+            <span className="font-inter text-sm" style={{ color: t.headerSubtext }}>{i18n.surahDetailBackToSurahs}</span>
           </div>
 
           <div className="text-center">
             <p className="font-amiri" style={{ fontSize: "28px", color: t.goldLight, textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>{surah?.name_arabic}</p>
             <p className="font-inter font-bold" style={{ fontSize: "16px", color: t.textOnDark, marginTop: "2px" }}>{surah?.name_english}</p>
             <p className="font-inter" style={{ fontSize: "11px", color: t.headerSubtext, marginTop: "3px" }}>
-              {surah?.name_translation} · {surah?.total_verses} verses · {surah?.revelation_type}
+              {surah?.name_translation} · {i18n.commonVerseCount({ count: surah?.total_verses })} · {surah?.revelation_type}
             </p>
 
             <div className="mt-4 mx-8">
@@ -99,7 +101,7 @@ export default function SurahDetail() {
                 }} />
               </div>
               <p className="font-inter text-center mt-1" style={{ fontSize: "10px", color: t.headerSubtext }}>
-                {completedCount}/{chunks.length} chunks completed
+                {i18n.commonChunksCompleted({ completed: completedCount, total: chunks.length })}
               </p>
             </div>
           </div>
@@ -141,9 +143,9 @@ export default function SurahDetail() {
                       <StatusIcon style={{ color: status.iconColor, width: "18px", height: "18px" }} />
                     </div>
                     <div>
-                      <p className="font-inter font-semibold" style={{ fontSize: "13px", color: t.textPrimary }}>Chunk {i + 1}</p>
+                      <p className="font-inter font-semibold" style={{ fontSize: "13px", color: t.textPrimary }}>{i18n.commonChunk({ index: i + 1 })}</p>
                       <p className="font-inter" style={{ fontSize: "10.5px", color: t.textMuted, marginTop: "1px" }}>
-                        Verses {chunk.start_verse}–{chunk.end_verse}
+                        {i18n.commonVerseRange({ start: chunk.start_verse, end: chunk.end_verse })}
                       </p>
                     </div>
                   </div>
@@ -172,7 +174,7 @@ export default function SurahDetail() {
                         boxShadow: t.goldShadow,
                         opacity: chunk.status !== "completed" && chunk.status !== "in_progress" ? 0.45 : 1,
                       }}
-                      title={chunk.status !== "completed" && chunk.status !== "in_progress" ? "Record first, then test yourself" : "Recite"}
+                      title={chunk.status !== "completed" && chunk.status !== "in_progress" ? i18n.surahDetailRecordFirst : i18n.surahDetailRecite}
                     >
                       <Brain className="w-4 h-4" style={{ color: "#2B241B" }} />
                     </motion.button>

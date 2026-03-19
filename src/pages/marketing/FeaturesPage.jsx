@@ -22,17 +22,10 @@ export default function FeaturesPage() {
       />
       <h1 className="text-3xl font-bold text-[#F2D675]">{t.features}</h1>
       <div className="mt-6 space-y-4">
-        {[
-          ["Chunk Learning Engine", "Automatic chunk generation with overlap to reinforce memorization continuity."],
-          ["Verse-by-Verse Recording", "Record, redo, and save each verse with clear progress steps."],
-          ["Adaptive Repetition", "Control verse repetition, chunk repetition, and playback speed."],
-          ["Surah Navigation", "Browse surahs, inspect chunk status, and jump directly to practice sessions."],
-          ["Progress Insights", "Monitor streaks, completed chunks, and listening totals for accountability."],
-          ["Language & Display Controls", "Choose translation language and customize text visibility settings."],
-        ].map(([t, d]) => (
-          <article key={t} className="rounded-xl border border-[#D4AF37]/30 p-4 bg-[#0E5B3D]">
-            <h2 className="text-lg font-semibold text-[#F2D675]">{t}</h2>
-            <p className="mt-1 text-sm text-[#F8F3E8]/85">{d}</p>
+        {(t.featuresItems || []).map(([title, desc]) => (
+          <article key={title} className="rounded-xl border border-[#D4AF37]/30 p-4 bg-[#0E5B3D]">
+            <h2 className="text-lg font-semibold text-[#F2D675]">{title}</h2>
+            <p className="mt-1 text-sm text-[#F8F3E8]/85">{desc}</p>
           </article>
         ))}
       </div>

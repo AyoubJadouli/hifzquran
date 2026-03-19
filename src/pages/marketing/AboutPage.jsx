@@ -22,18 +22,9 @@ export default function AboutPage() {
       />
       <h1 className="text-3xl font-bold text-[#F2D675]">{t.about}</h1>
       <div className="mt-6 space-y-4 text-[#F8F3E8]/90">
-        <p>
-          Hifd Quran is designed to support structured Quran memorization using a practical, repeatable,
-          and student-friendly workflow.
-        </p>
-        <p>
-          The platform combines recitation recording, repetition playback, and progress tracking so learners
-          can build consistency over months and years.
-        </p>
-        <p>
-          Our vision is to make high-quality Hifz support accessible for students, teachers, and families,
-          while respecting the spiritual nature of Quran learning.
-        </p>
+        {(t.aboutParagraphs || []).map((paragraph, index) => (
+          <p key={index}>{paragraph}</p>
+        ))}
       </div>
     </MarketingLayout>
   );

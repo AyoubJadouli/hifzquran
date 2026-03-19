@@ -1,0 +1,67 @@
+{
+  "name": "Chunk",
+  "type": "object",
+  "properties": {
+    "surah_number": {
+      "type": "number",
+      "description": "Surah number (1-114)"
+    },
+    "start_verse": {
+      "type": "number",
+      "description": "Starting verse number"
+    },
+    "end_verse": {
+      "type": "number",
+      "description": "Ending verse number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "completed"
+      ],
+      "default": "not_started",
+      "description": "Memorization status"
+    },
+    "chunk_index": {
+      "type": "number",
+      "description": "Index of chunk within the surah"
+    },
+    "last_accessed": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time this chunk was accessed"
+    },
+    "recitation_attempts": {
+      "type": "number",
+      "default": 0,
+      "description": "How many recite/validate attempts were made"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When chunk was validated as completed"
+    },
+    "last_recitation_attempt_id": {
+      "type": "string",
+      "description": "Reference to latest recitation attempt"
+    },
+    "listen_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many listening sessions were started for this chunk"
+    },
+    "recite_prompt_dismissed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the test-yourself prompt was dismissed"
+    }
+  },
+  "required": [
+    "surah_number",
+    "start_verse",
+    "end_verse",
+    "chunk_index"
+  ]
+}
