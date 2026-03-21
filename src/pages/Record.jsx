@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { localEntities } from "../components/localData";
+import { localChunkIndex, localEntities } from "../components/localData";
 import { storeAudioBlob } from "../components/fileStorage";
-import { fetchSurahVerses } from "../components/quranData";
+import { fetchSurahList, fetchSurahVersesForLanguage, generateChunks } from "../components/quranData";
+import { useSettings } from "../components/useSettings";
 import { X, RotateCcw, Play, Square, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -252,6 +253,7 @@ export default function Record() {
   const navigate = useNavigate();
   const params = new URLSearchParams(window.location.search);
   const chunkId = params.get("chunkId");
+  const { settings } = useSettings();
 
   const [chunk, setChunk] = useState(null);
   const [surah, setSurah] = useState(null);
@@ -306,11 +308,64 @@ export default function Record() {
 
   async function loadChunkData() {
     if (!chunkId) { navigate("/Home"); return; }
+    let c = null;
+
     const chunks = await localEntities.Chunk.filter({ id: chunkId });
-    if (!chunks.length) { navigate("/Home"); return; }
-    const c = chunks[0];
+    if (chunks.length) {
+      c = chunks[0];
+    } else {
+      const match = /^((idx|runtime)_(\d+)_(\d+))$/.exec(chunkId);
+      if (match) {
+        const surahNumber = parseInt(match[3], 10);
+        const chunkIndex = parseInt(match[4], 10);
+        const storedIndex = await localChunkIndex.get();
+        const raw = storedIndex?.surahs?.[String(surahNumber)] || storedIndex?.surahs?.[surahNumber];
+
+        if (raw && storedIndex.chunk_size === (settings.chunk_size || 7) && storedIndex.chunk_overlap === (settings.chunk_overlap || 2)) {
+          const tuple = raw.find(([idx]) => idx === chunkIndex);
+          if (tuple) {
+            c = {
+              id: chunkId,
+              surah_number: surahNumber,
+              chunk_index: tuple[0],
+              start_verse: tuple[1],
+              end_verse: tuple[2],
+              status: "not_started",
+            };
+          }
+        }
+
+        if (!c) {
+          const surahList = await fetchSurahList();
+          const surahMeta = surahList.find((surah) => surah.number === surahNumber);
+          if (surahMeta) {
+            const generated = generateChunks(surahMeta.total_verses, settings.chunk_size || 7, settings.chunk_overlap || 2);
+            const fallback = generated.find((chunk) => chunk.chunk_index === chunkIndex);
+            if (fallback) {
+              c = {
+                id: chunkId,
+                surah_number: surahNumber,
+                chunk_index: fallback.chunk_index,
+                start_verse: fallback.start_verse,
+                end_verse: fallback.end_verse,
+                status: "not_started",
+              };
+            }
+          }
+        }
+      }
+    }
+
+    if (!c) { navigate("/Home"); return; }
+
     setChunk(c);
-    const surahData = await fetchSurahVerses(c.surah_number);
+    const surahData = await fetchSurahVersesForLanguage(
+      c.surah_number,
+      settings.display_language || "en",
+      settings.quran_riwaya || "warsh",
+      settings.transliteration_language || "en",
+      settings.transliteration_source || "standard"
+    );
     setSurah(surahData);
     const cv = surahData.verses.filter(v => v.number >= c.start_verse && v.number <= c.end_verse);
     setVerses(cv);

@@ -7,6 +7,35 @@ import { Search, ChevronRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useThemeColors } from "../components/useThemeColors";
 
+const REVELATION_ORDER = [
+  96, 68, 73, 74, 1, 111, 81, 87, 92, 89, 93, 94, 103, 100, 108, 102, 107, 109,
+  105, 113, 114, 112, 53, 80, 97, 91, 85, 95, 106, 101, 75, 104, 77, 50, 90, 86,
+  54, 38, 7, 72, 36, 25, 35, 19, 20, 56, 26, 27, 28, 17, 10, 11, 12, 15, 6, 37,
+  31, 34, 39, 40, 41, 42, 43, 44, 45, 46, 51, 88, 18, 16, 71, 14, 21, 23, 32, 52,
+  67, 69, 70, 78, 79, 82, 84, 30, 29, 83, 2, 8, 3, 33, 60, 4, 99, 57, 47, 13, 55,
+  76, 65, 98, 59, 24, 22, 63, 58, 49, 66, 64, 61, 62, 48, 5, 9,
+];
+
+const REVELATION_ORDER_INDEX = Object.fromEntries(
+  REVELATION_ORDER.map((surahNumber, index) => [surahNumber, index])
+);
+
+function orderSurahs(list, hifzOrder = "forward") {
+  const ordered = [...list];
+
+  switch (hifzOrder) {
+    case "reverse":
+      return ordered.sort((a, b) => b.number - a.number);
+    case "revelation_forward":
+      return ordered.sort((a, b) => (REVELATION_ORDER_INDEX[a.number] ?? 999) - (REVELATION_ORDER_INDEX[b.number] ?? 999));
+    case "revelation_reverse":
+      return ordered.sort((a, b) => (REVELATION_ORDER_INDEX[b.number] ?? -1) - (REVELATION_ORDER_INDEX[a.number] ?? -1));
+    case "forward":
+    default:
+      return ordered.sort((a, b) => a.number - b.number);
+  }
+}
+
 export default function Surahs() {
   const navigate = useNavigate();
   const t = useThemeColors();
@@ -24,10 +53,13 @@ export default function Surahs() {
     setLoading(false);
   }
 
-  const filtered = surahs.filter(s =>
+  const filtered = orderSurahs(
+    surahs.filter(s =>
     s.name_english.toLowerCase().includes(search.toLowerCase()) ||
     s.name_arabic.includes(search) ||
     String(s.number).includes(search)
+    ),
+    settings.hifz_order
   );
 
   if (loading) {
@@ -89,7 +121,7 @@ export default function Surahs() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: Math.min(i * 0.015, 0.4) }}
-              onClick={() => navigate(`/SurahDetail?id=${surah.number}`)}
+              onClick={() => navigate(`/app/SurahDetail?id=${surah.number}`)}
               className="w-full text-left relative overflow-hidden"
               style={{
                 background: t.cardBg,

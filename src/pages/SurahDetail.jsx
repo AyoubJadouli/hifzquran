@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { localEntities } from "../components/localData";
-import { fetchSurahVerses, generateChunks } from "../components/quranData";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { localChunkIndex, localEntities } from "../components/localData";
+import { fetchSurahVersesForLanguage, generateChunks } from "../components/quranData";
 import { getAppT } from "../components/appI18n";
 import { useSettings } from "../components/useSettings";
 import { ArrowLeft, Mic, Play, Loader2, CheckCircle2, Circle, Clock, Brain } from "lucide-react";
@@ -10,9 +10,9 @@ import { useThemeColors } from "../components/useThemeColors";
 
 export default function SurahDetail() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const t = useThemeColors();
-  const params = new URLSearchParams(window.location.search);
-  const surahId = parseInt(params.get("id") || "1");
+  const surahId = parseInt(searchParams.get("id") || "1", 10);
   const { settings, updateSettings } = useSettings();
   const i18n = getAppT(settings.display_language);
 
@@ -20,17 +20,77 @@ export default function SurahDetail() {
   const [chunks, setChunks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { loadSurah(); }, [surahId]);
+  function normalizeChunkRecord(chunk) {
+    return {
+      ...chunk,
+      surah_number: surahId,
+      status: chunk.status || "not_started",
+      listen_count: chunk.listen_count || 0,
+      recitation_attempts: chunk.recitation_attempts || 0,
+      recite_prompt_dismissed: chunk.recite_prompt_dismissed || false,
+    };
+  }
+
+  async function getIndexedChunksForSurah(totalVerses) {
+    const storedIndex = await localChunkIndex.get();
+    const indexSurahs = storedIndex?.surahs || {};
+    const raw = indexSurahs[String(surahId)] || indexSurahs[surahId];
+
+    if (raw && storedIndex.chunk_size === (settings.chunk_size || 7) && storedIndex.chunk_overlap === (settings.chunk_overlap || 2)) {
+      return raw.map(([chunk_index, start_verse, end_verse]) => ({
+        id: `idx_${surahId}_${chunk_index}`,
+        surah_number: surahId,
+        chunk_index,
+        start_verse,
+        end_verse,
+        status: "not_started",
+        listen_count: 0,
+        recitation_attempts: 0,
+        recite_prompt_dismissed: false,
+      }));
+    }
+
+    return generateChunks(totalVerses, settings.chunk_size || 7, settings.chunk_overlap || 2).map((chunk) => ({
+      ...chunk,
+      id: `runtime_${surahId}_${chunk.chunk_index}`,
+      surah_number: surahId,
+      status: "not_started",
+      listen_count: 0,
+      recitation_attempts: 0,
+      recite_prompt_dismissed: false,
+    }));
+  }
+
+  useEffect(() => { loadSurah(); }, [
+    surahId,
+    settings.display_language,
+    settings.quran_riwaya,
+    settings.transliteration_language,
+    settings.transliteration_source,
+  ]);
 
   async function loadSurah() {
     setLoading(true);
-    const surahData = await fetchSurahVerses(surahId);
+    const surahData = await fetchSurahVersesForLanguage(
+      surahId,
+      settings.display_language || "en",
+      settings.quran_riwaya || "warsh",
+      settings.transliteration_language || "en",
+      settings.transliteration_source || "standard"
+    );
     setSurah(surahData);
-    let existingChunks = await localEntities.Chunk.filter({ surah_number: surahId }, "chunk_index");
-    if (existingChunks.length === 0) {
-      const generated = generateChunks(surahData.total_verses, settings.chunk_size || 7, settings.chunk_overlap || 2);
-      const created = await localEntities.Chunk.bulkCreate(generated.map(c => ({ ...c, surah_number: surahId, status: "not_started" })));
-      existingChunks = created;
+    let existingChunks = (await localEntities.Chunk.filter({ surah_number: surahId }, "chunk_index")).map(normalizeChunkRecord);
+    const expected = generateChunks(surahData.total_verses, settings.chunk_size || 7, settings.chunk_overlap || 2);
+    const matchesExpected =
+      existingChunks.length === expected.length &&
+      existingChunks.every((chunk, index) =>
+        chunk.chunk_index === expected[index].chunk_index &&
+        chunk.start_verse === expected[index].start_verse &&
+        chunk.end_verse === expected[index].end_verse
+      );
+
+    if (!matchesExpected) {
+      existingChunks = await getIndexedChunksForSurah(surahData.total_verses);
     }
     setChunks(existingChunks);
     setLoading(false);

@@ -1,5 +1,63 @@
-// Local browser-only data storage using localStorage
-// Mimics the base44 entities API interface
+// Local browser-only data storage using localStorage + IndexedDB
+// localStorage is used for small entity datasets, while larger generated
+// indexes should go to IndexedDB to avoid quota issues.
+
+const DB_NAME = 'hifz_app_storage';
+const DB_VERSION = 1;
+const LARGE_STORE = 'large_kv';
+let dbPromise = null;
+
+function openDB() {
+  if (typeof indexedDB === 'undefined') {
+    return Promise.reject(new Error('IndexedDB is not available in this browser'));
+  }
+
+  if (dbPromise) return dbPromise;
+
+  dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(LARGE_STORE)) {
+        db.createObjectStore(LARGE_STORE);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error('Failed to open IndexedDB'));
+  });
+
+  return dbPromise;
+}
+
+async function getLargeValue(key) {
+  const db = await openDB();
+  return await new Promise((resolve, reject) => {
+    const tx = db.transaction(LARGE_STORE, 'readonly');
+    const req = tx.objectStore(LARGE_STORE).get(key);
+    req.onsuccess = () => resolve(req.result ?? null);
+    req.onerror = () => reject(req.error || new Error(`Failed to read ${key}`));
+  });
+}
+
+async function setLargeValue(key, value) {
+  const db = await openDB();
+  return await new Promise((resolve, reject) => {
+    const tx = db.transaction(LARGE_STORE, 'readwrite');
+    tx.objectStore(LARGE_STORE).put(value, key);
+    tx.oncomplete = () => resolve(value);
+    tx.onerror = () => reject(tx.error || new Error(`Failed to write ${key}`));
+  });
+}
+
+async function deleteLargeValue(key) {
+  const db = await openDB();
+  return await new Promise((resolve, reject) => {
+    const tx = db.transaction(LARGE_STORE, 'readwrite');
+    tx.objectStore(LARGE_STORE).delete(key);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error || new Error(`Failed to delete ${key}`));
+  });
+}
 
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
@@ -11,6 +69,15 @@ function getStore(name) {
 }
 
 function saveStore(name, data) {
+  localStorage.setItem(`hifz_${name}`, JSON.stringify(data));
+}
+
+function getObjectStore(name) {
+  try { return JSON.parse(localStorage.getItem(`hifz_${name}`) || '{}'); }
+  catch { return {}; }
+}
+
+function saveObjectStore(name, data) {
   localStorage.setItem(`hifz_${name}`, JSON.stringify(data));
 }
 
@@ -84,4 +151,13 @@ export const localEntities = {
   Recording: makeEntity('Recording'),
   RecitationAttempt: makeEntity('RecitationAttempt'),
   UserSettings: makeEntity('UserSettings'),
+};
+
+export const localChunkIndex = {
+  get: async () => {
+    const value = await getLargeValue('ChunkIndex');
+    return value || {};
+  },
+  set: async (value) => setLargeValue('ChunkIndex', value || {}),
+  clear: async () => deleteLargeValue('ChunkIndex'),
 };

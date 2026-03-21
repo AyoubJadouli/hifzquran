@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useThemeColors } from "./useThemeColors";
-import { getAppT } from "./appI18n";
+import { getAppT, getAppDir, normalizeAppLang } from "./appI18n";
 import { useSettings } from "./useSettings";
 import { Home, BookOpen, BarChart3, Settings } from "lucide-react";
 
@@ -10,6 +10,17 @@ export default function AppLayout() {
   const t = useThemeColors();
   const { settings } = useSettings();
   const i18n = getAppT(settings.display_language);
+  const dir = getAppDir(settings.display_language);
+  const langAttr = normalizeAppLang(settings.display_language);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dir = dir;
+    root.lang = langAttr;
+
+    document.body.dir = dir;
+    document.body.lang = langAttr;
+  }, [dir, langAttr]);
 
   const NAV_ITEMS = [
     { path: "/Home", icon: Home, label: i18n.navHome },
@@ -26,7 +37,7 @@ export default function AppLayout() {
     location.pathname.startsWith("/recite/");
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background" dir={dir} lang={langAttr}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
         .font-amiri { font-family: 'Amiri', serif; }

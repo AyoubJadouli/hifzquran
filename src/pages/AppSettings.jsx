@@ -1,16 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
+import { getAppT } from "../components/appI18n";
 import { useSettings } from "../components/useSettings";
 import {
   SUPPORTED_RIWAYAT,
   SUPPORTED_TRANSLITERATION_LANGUAGES,
   SUPPORTED_TRANSLITERATION_SOURCES,
+  fetchSurahList,
+  generateChunks,
 } from "../components/quranData";
+import { localChunkIndex, localEntities } from "../components/localData";
 // No server needed — all data is stored locally in the browser
 import { useTheme } from "../components/ThemeContext";
 import { useThemeColors } from "../components/useThemeColors";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Moon, Sun } from "lucide-react";
+import { CheckCircle2, Loader2, Moon, Sun } from "lucide-react";
 
 const LANGUAGES = {
   en: "English", ar: "العربية", fr: "Français", es: "Español",
@@ -40,6 +44,16 @@ export default function AppSettings() {
   const { settings, updateSettings, loading } = useSettings();
   const { theme, setTheme } = useTheme();
   const t = useThemeColors();
+  const i18n = getAppT(settings.display_language);
+  const [generatingChunks, setGeneratingChunks] = useState(false);
+  const [chunkGenerationResult, setChunkGenerationResult] = useState(null);
+
+  const hifzOrders = {
+    forward: i18n.settingsHifzOrderForward,
+    reverse: i18n.settingsHifzOrderReverse,
+    revelation_forward: i18n.settingsHifzOrderRevelationForward,
+    revelation_reverse: i18n.settingsHifzOrderRevelationReverse,
+  };
 
   if (loading) {
     return (
@@ -47,6 +61,52 @@ export default function AppSettings() {
         <Loader2 className="w-8 h-8 animate-spin" style={{ color: t.gold }} />
       </div>
     );
+  }
+
+  async function handleGenerateAllChunks() {
+    setGeneratingChunks(true);
+    setChunkGenerationResult(null);
+
+    try {
+      const surahList = await fetchSurahList();
+      const chunkSize = settings.chunk_size || 7;
+      const chunkOverlap = settings.chunk_overlap || 2;
+
+      let totalChunks = 0;
+      const generatedIndex = {
+        version: 1,
+        chunk_size: chunkSize,
+        chunk_overlap: chunkOverlap,
+        generated_at: new Date().toISOString(),
+        surahs: {},
+      };
+
+      for (const surah of surahList) {
+        const generated = generateChunks(surah.total_verses, chunkSize, chunkOverlap);
+        generatedIndex.surahs[surah.number] = generated.map((chunk) => [
+          chunk.chunk_index,
+          chunk.start_verse,
+          chunk.end_verse,
+        ]);
+        totalChunks += generated.length;
+      }
+
+      await localChunkIndex.set(generatedIndex);
+
+      const existingChunks = await localEntities.Chunk.list();
+      for (const chunk of existingChunks) {
+        await localEntities.Chunk.delete(chunk.id);
+      }
+
+      setChunkGenerationResult({
+        surahCount: surahList.length,
+        chunkCount: totalChunks,
+      });
+    } catch (error) {
+      setChunkGenerationResult({ error: error?.message || "Failed to generate chunks" });
+    } finally {
+      setGeneratingChunks(false);
+    }
   }
 
   return (
@@ -63,7 +123,7 @@ export default function AppSettings() {
         <div className="absolute bottom-0 left-0 right-0" style={{ height: "1.5px", background: `linear-gradient(to right, transparent, ${t.goldLight} 20%, ${t.gold} 50%, ${t.goldLight} 80%, transparent)` }} />
         <div className="relative z-10 text-center">
           <p className="font-amiri" style={{ fontSize: "22px", color: t.goldLight, textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>الإعدادات</p>
-          <p className="font-inter font-bold" style={{ fontSize: "15px", color: t.textOnDark, marginTop: "2px" }}>Settings</p>
+          <p className="font-inter font-bold" style={{ fontSize: "15px", color: t.textOnDark, marginTop: "2px" }}>{i18n.settingsTitle}</p>
         </div>
       </div>
 
@@ -71,13 +131,13 @@ export default function AppSettings() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5 pb-8">
 
         {/* Appearance */}
-        <LuxSection title="Appearance" t={t}>
+        <LuxSection title={i18n.settingsSectionAppearance} t={t}>
           <div className="flex items-center justify-between">
-            <span className="font-inter font-medium text-sm" style={{ color: t.textPrimary }}>Theme</span>
+            <span className="font-inter font-medium text-sm" style={{ color: t.textPrimary }}>{i18n.settingsTheme}</span>
             <div className="flex gap-2">
               {[
-                { val: "light", icon: Sun, label: "Light" },
-                { val: "dark", icon: Moon, label: "Dark" },
+                { val: "light", icon: Sun, label: i18n.settingsThemeLight },
+                { val: "dark", icon: Moon, label: i18n.settingsThemeDark },
               ].map(({ val, icon: Icon, label }) => (
                 <button key={val} onClick={() => setTheme(val)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-inter text-xs font-semibold transition-all relative overflow-hidden"
@@ -98,23 +158,62 @@ export default function AppSettings() {
         </LuxSection>
 
         {/* Chunk Configuration */}
-        <LuxSection title="Chunk Configuration" t={t}>
-          <LuxRow label="Chunk Size" t={t}>
+        <LuxSection title={i18n.settingsSectionChunkConfiguration} t={t}>
+          <LuxRow label={i18n.settingsChunkSize} t={t}>
             <LuxSelect value={String(settings.chunk_size)} onChange={v => updateSettings({ chunk_size: parseInt(v) })} t={t}>
-              {[3, 5, 7, 10, 15].map(n => <SelectItem key={n} value={String(n)}>{n} verses</SelectItem>)}
+              {[3, 5, 7, 10, 15].map(n => <SelectItem key={n} value={String(n)}>{i18n.commonVerseCount({ count: n })}</SelectItem>)}
             </LuxSelect>
           </LuxRow>
-          <LuxRow label="Overlap" t={t}>
+          <LuxRow label={i18n.settingsOverlap} t={t}>
             <LuxSelect value={String(settings.chunk_overlap)} onChange={v => updateSettings({ chunk_overlap: parseInt(v) })} t={t}>
-              {[0, 1, 2, 3, 5].map(n => <SelectItem key={n} value={String(n)}>{n} verses</SelectItem>)}
+              {[0, 1, 2, 3, 5].map(n => <SelectItem key={n} value={String(n)}>{i18n.commonVerseCount({ count: n })}</SelectItem>)}
             </LuxSelect>
           </LuxRow>
+
+          <div className="pt-1 space-y-3">
+            <button
+              onClick={handleGenerateAllChunks}
+              disabled={generatingChunks}
+              className="w-full rounded-xl px-4 py-3 font-inter text-sm font-semibold transition-all"
+              style={{
+                background: generatingChunks ? "rgba(212,175,55,0.15)" : t.goldGradient,
+                color: generatingChunks ? t.gold : "#2B241B",
+                border: `1px solid ${generatingChunks ? t.cardBorder : t.goldDark}`,
+                boxShadow: generatingChunks ? "none" : t.goldShadow,
+                opacity: generatingChunks ? 0.8 : 1,
+              }}
+            >
+              {generatingChunks ? i18n.settingsGenerateChunksRunning : i18n.settingsGenerateChunksButton}
+            </button>
+
+            <p className="font-inter text-xs" style={{ color: t.textMuted, lineHeight: 1.6 }}>
+              {i18n.settingsGenerateChunksHint}
+            </p>
+
+            {chunkGenerationResult?.error ? (
+              <div className="rounded-xl px-3 py-2 font-inter text-xs" style={{ background: "rgba(190, 24, 93, 0.1)", color: "#be185d", border: "1px solid rgba(190,24,93,0.25)" }}>
+                {chunkGenerationResult.error}
+              </div>
+            ) : null}
+
+            {chunkGenerationResult && !chunkGenerationResult.error ? (
+              <div className="rounded-xl px-3 py-2 flex items-start gap-2 font-inter text-xs" style={{ background: "rgba(46, 204, 113, 0.1)", color: t.textPrimary, border: "1px solid rgba(46,204,113,0.25)" }}>
+                <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#2ecc71" }} />
+                <span>
+                  {i18n.settingsGenerateChunksSuccess({
+                    surahCount: chunkGenerationResult.surahCount,
+                    chunkCount: chunkGenerationResult.chunkCount,
+                  })}
+                </span>
+              </div>
+            ) : null}
+          </div>
         </LuxSection>
 
         {/* Hifz Order */}
-        <LuxSection title="Hifz Order" t={t}>
+        <LuxSection title={i18n.settingsSectionHifzOrder} t={t}>
           <div className="space-y-2">
-            {Object.entries(HIFZ_ORDERS).map(([key, label]) => (
+            {Object.entries(hifzOrders).map(([key, label]) => (
               <button key={key} onClick={() => updateSettings({ hifz_order: key })}
                 className="w-full text-left px-4 py-3 rounded-xl font-inter text-sm transition-all relative overflow-hidden"
                 style={settings.hifz_order === key ? {
@@ -135,51 +234,51 @@ export default function AppSettings() {
         </LuxSection>
 
         {/* Display */}
-        <LuxSection title="Display" t={t}>
-          <LuxRow label="Riwaya" t={t}>
+        <LuxSection title={i18n.settingsSectionDisplay} t={t}>
+          <LuxRow label={i18n.settingsRiwaya} t={t}>
             <LuxSelect value={settings.quran_riwaya} onChange={v => updateSettings({ quran_riwaya: v })} t={t} wide>
               {Object.entries(RIWAYAT).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
             </LuxSelect>
           </LuxRow>
-          <LuxRow label="Language" t={t}>
+          <LuxRow label={i18n.settingsLanguage} t={t}>
             <LuxSelect value={settings.display_language} onChange={v => updateSettings({ display_language: v })} t={t} wide>
               {Object.entries(LANGUAGES).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
             </LuxSelect>
           </LuxRow>
-          <LuxRow label="Translit. Language" t={t}>
+          <LuxRow label={i18n.settingsTranslitLanguage} t={t}>
             <LuxSelect value={settings.transliteration_language} onChange={v => updateSettings({ transliteration_language: v })} t={t} wide>
               {Object.entries(TRANSLITERATION_LANGUAGES).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
             </LuxSelect>
           </LuxRow>
-          <LuxRow label="Translit. Source" t={t}>
+          <LuxRow label={i18n.settingsTranslitSource} t={t}>
             <LuxSelect value={settings.transliteration_source} onChange={v => updateSettings({ transliteration_source: v })} t={t} wide>
               {Object.entries(TRANSLITERATION_SOURCES).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
             </LuxSelect>
           </LuxRow>
           <LuxSwitchRow
-            label="Offline Transliteration Packs"
+            label={i18n.settingsOfflineTransliterationPacks}
             checked={settings.offline_download_transliteration}
             onChange={v => updateSettings({ offline_download_transliteration: v })}
             t={t}
           />
-          <LuxSwitchRow label="Show Arabic" checked={settings.show_arabic} onChange={v => updateSettings({ show_arabic: v })} t={t} />
-          <LuxSwitchRow label="Show Transliteration" checked={settings.show_transliteration} onChange={v => updateSettings({ show_transliteration: v })} t={t} />
-          <LuxSwitchRow label="Show Translation" checked={settings.show_translation} onChange={v => updateSettings({ show_translation: v })} t={t} />
+          <LuxSwitchRow label={i18n.settingsShowArabic} checked={settings.show_arabic} onChange={v => updateSettings({ show_arabic: v })} t={t} />
+          <LuxSwitchRow label={i18n.settingsShowTransliteration} checked={settings.show_transliteration} onChange={v => updateSettings({ show_transliteration: v })} t={t} />
+          <LuxSwitchRow label={i18n.settingsShowTranslation} checked={settings.show_translation} onChange={v => updateSettings({ show_translation: v })} t={t} />
         </LuxSection>
 
         {/* Default Playback */}
-        <LuxSection title="Default Playback" t={t}>
-          <LuxRow label="Speed" t={t}>
+        <LuxSection title={i18n.settingsSectionDefaultPlayback} t={t}>
+          <LuxRow label={i18n.settingsSpeed} t={t}>
             <LuxSelect value={String(settings.default_speed)} onChange={v => updateSettings({ default_speed: parseFloat(v) })} t={t}>
               {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map(s => <SelectItem key={s} value={String(s)}>{s}x</SelectItem>)}
             </LuxSelect>
           </LuxRow>
-          <LuxRow label="Verse Repetition" t={t}>
+          <LuxRow label={i18n.settingsVerseRepetition} t={t}>
             <LuxSelect value={String(settings.default_verse_repetition)} onChange={v => updateSettings({ default_verse_repetition: parseInt(v) })} t={t}>
               {[1, 2, 3, 10].map(n => <SelectItem key={n} value={String(n)}>{n}x</SelectItem>)}
             </LuxSelect>
           </LuxRow>
-          <LuxRow label="Chunk Repetition" t={t}>
+          <LuxRow label={i18n.settingsChunkRepetition} t={t}>
             <LuxSelect value={String(settings.default_chunk_repetition)} onChange={v => updateSettings({ default_chunk_repetition: parseInt(v) })} t={t}>
               {[1, 2, 3, 0].map(n => <SelectItem key={n} value={String(n)}>{n === 0 ? "∞" : `${n}x`}</SelectItem>)}
             </LuxSelect>
@@ -192,7 +291,7 @@ export default function AppSettings() {
           <div className="absolute top-0 left-0 right-0 pointer-events-none"
             style={{ height: "40%", background: "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%)", borderRadius: "14px 14px 0 0" }} />
           <p className="font-inter italic relative z-10" style={{ fontSize: "12.5px", color: t.tipText, lineHeight: 1.65 }}>
-            ✨ "Consistency is the key to Hifz. Keep going, and Allah will guide you!"
+            {i18n.settingsConsistencyTip}
           </p>
         </div>
 

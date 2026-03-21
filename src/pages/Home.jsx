@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { localEntities } from "../components/localData";
+import { localChunkIndex, localEntities } from "../components/localData";
 import { resolveAudioUrl } from "../components/fileStorage";
 import { fetchSurahVersesForLanguage, generateChunks, prefetchAllQuranData } from "../components/quranData";
 import { useSettings } from "../components/useSettings";
@@ -60,6 +60,71 @@ export default function Home() {
   useEffect(() => { chunksRef.current = chunks; }, [chunks]);
   useEffect(() => { currentChunkIndexRef.current = currentChunkIndex; }, [currentChunkIndex]);
 
+  function normalizeChunkRecord(chunk, surahNumber) {
+    return {
+      ...chunk,
+      surah_number: surahNumber,
+      status: chunk.status || "not_started",
+      listen_count: chunk.listen_count || 0,
+      recitation_attempts: chunk.recitation_attempts || 0,
+      recite_prompt_dismissed: chunk.recite_prompt_dismissed || false,
+    };
+  }
+
+  async function getIndexedChunksForSurah(surahNumber) {
+    const storedIndex = await localChunkIndex.get();
+    const indexSurahs = storedIndex?.surahs || {};
+    const raw = indexSurahs[String(surahNumber)] || indexSurahs[surahNumber];
+    if (!raw || storedIndex.chunk_size !== (settings.chunk_size || 7) || storedIndex.chunk_overlap !== (settings.chunk_overlap || 2)) {
+      return null;
+    }
+
+    return raw.map(([chunk_index, start_verse, end_verse]) => ({
+      chunk_index,
+      start_verse,
+      end_verse,
+      surah_number: surahNumber,
+      status: "not_started",
+      listen_count: 0,
+      recitation_attempts: 0,
+      recite_prompt_dismissed: false,
+      id: `idx_${surahNumber}_${chunk_index}`,
+    }));
+  }
+
+  async function getChunksForSurah(surahData, surahNum) {
+    const chunkSize = settings.chunk_size || 7;
+    const chunkOverlap = settings.chunk_overlap || 2;
+
+    let existing = (await localEntities.Chunk.filter({ surah_number: surahNum }, "chunk_index")).map((chunk) =>
+      normalizeChunkRecord(chunk, surahNum)
+    );
+
+    const expected = generateChunks(surahData.total_verses, chunkSize, chunkOverlap);
+    const matchesExpected =
+      existing.length === expected.length &&
+      existing.every((chunk, index) =>
+        chunk.chunk_index === expected[index].chunk_index &&
+        chunk.start_verse === expected[index].start_verse &&
+        chunk.end_verse === expected[index].end_verse
+      );
+
+    if (matchesExpected) return existing;
+
+    const indexed = await getIndexedChunksForSurah(surahNum);
+    if (indexed?.length) return indexed;
+
+    return expected.map((chunk) => ({
+      ...chunk,
+      surah_number: surahNum,
+      status: "not_started",
+      listen_count: 0,
+      recitation_attempts: 0,
+      recite_prompt_dismissed: false,
+      id: `runtime_${surahNum}_${chunk.chunk_index}`,
+    }));
+  }
+
   // Initial load
   useEffect(() => {
     if (!settingsLoading) {
@@ -111,20 +176,6 @@ export default function Home() {
     verseRefs.current[currentVerseIndex]?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [currentVerseIndex]);
 
-  async function generateChunksForSurah(surahData, surahNum) {
-    const chunkSize = settings.chunk_size || 7;
-    const chunkOverlap = settings.chunk_overlap || 2;
-    const gen = generateChunks(surahData.total_verses, chunkSize, chunkOverlap);
-
-    // Delete old chunks for this surah and recreate
-    const old = await localEntities.Chunk.filter({ surah_number: surahNum });
-    for (const c of old) await localEntities.Chunk.delete(c.id);
-
-    return await localEntities.Chunk.bulkCreate(
-      gen.map(c => ({ ...c, surah_number: surahNum, status: "not_started" }))
-    );
-  }
-
   async function loadInitialData() {
     setLoading(true);
     const surahNum = settings.last_surah_number || 1;
@@ -137,16 +188,7 @@ export default function Home() {
     );
     setSurah(surahData);
 
-    const chunkSize = settings.chunk_size || 7;
-    const chunkOverlap = settings.chunk_overlap || 2;
-    let existing = await localEntities.Chunk.filter({ surah_number: surahNum }, "chunk_index");
-
-    // Regenerate if chunk count doesn't match expected (settings changed)
-    const expected = generateChunks(surahData.total_verses, chunkSize, chunkOverlap);
-    if (existing.length === 0 || existing.length !== expected.length ||
-        existing[0]?.end_verse !== expected[0]?.end_verse) {
-      existing = await generateChunksForSurah(surahData, surahNum);
-    }
+    const existing = await getChunksForSurah(surahData, surahNum);
 
     setChunks(existing);
     setCurrentChunkIndex(0);
@@ -209,15 +251,7 @@ export default function Home() {
     );
     setSurah(surahData);
 
-    const chunkSize = settings.chunk_size || 7;
-    const chunkOverlap = settings.chunk_overlap || 2;
-    let existing = await localEntities.Chunk.filter({ surah_number: surahNum }, "chunk_index");
-    const expected = generateChunks(surahData.total_verses, chunkSize, chunkOverlap);
-
-    if (existing.length === 0 || existing.length !== expected.length ||
-        existing[0]?.end_verse !== expected[0]?.end_verse) {
-      existing = await generateChunksForSurah(surahData, surahNum);
-    }
+    const existing = await getChunksForSurah(surahData, surahNum);
 
     setChunks(existing);
     setCurrentChunkIndex(0);
