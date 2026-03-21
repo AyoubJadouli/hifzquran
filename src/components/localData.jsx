@@ -161,6 +161,7 @@ export const localEntities = {
   Recording: makeEntity('Recording'),
   RecitationAttempt: makeEntity('RecitationAttempt'),
   UserSettings: makeEntity('UserSettings'),
+  Bookmark: makeEntity('Bookmark'),
 };
 
 export const localChunkIndex = {

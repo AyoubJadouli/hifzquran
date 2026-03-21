@@ -12,6 +12,7 @@ function createTranslator(base, overrides = {}) {
 
 const EN = {
   navHome: "Home",
+  navReader: "Reader",
   navSurahs: "Surahs",
   navProgress: "Progress",
   navSettings: "Settings",
@@ -106,6 +107,7 @@ const EN = {
 
 const AR = {
   navHome: "الرئيسية",
+  navReader: "المصحف",
   navSurahs: "السور",
   navProgress: "التقدم",
   navSettings: "الإعدادات",

@@ -7,6 +7,7 @@ import LandingPage from "./pages/marketing/LandingPage";
 import FeaturesPage from "./pages/marketing/FeaturesPage";
 import AboutPage from "./pages/marketing/AboutPage";
 import Home from "./pages/Home";
+import Reader from "./pages/Reader";
 import Surahs from "./pages/Surahs";
 import SurahDetail from "./pages/SurahDetail";
 import Progress from "./pages/Progress";
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/app" element={<AppLayout />}>
             <Route index element={<Navigate to="Home" replace />} />
             <Route path="Home" element={<Home />} />
+            <Route path="Reader" element={<Reader />} />
             <Route path="Surahs" element={<Surahs />} />
             <Route path="SurahDetail" element={<SurahDetail />} />
             <Route path="Progress" element={<Progress />} />
@@ -42,6 +44,7 @@ export default function App() {
 
           {/* Backward compatibility for old routes */}
           <Route path="/Home" element={<Navigate to="/app/Home" replace />} />
+          <Route path="/Reader" element={<Navigate to="/app/Reader" replace />} />
           <Route path="/Surahs" element={<Navigate to="/app/Surahs" replace />} />
           <Route path="/SurahDetail" element={<Navigate to="/app/SurahDetail" replace />} />
           <Route path="/Progress" element={<Navigate to="/app/Progress" replace />} />

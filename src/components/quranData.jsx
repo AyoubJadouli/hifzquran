@@ -160,6 +160,7 @@ export async function fetchSurahVersesForLanguage(
     translation: translationSurah?.ayahs?.[i]?.text || "",
     transliteration: transliterationSurah?.ayahs?.[i]?.text || "",
     audio_url: null,
+    sajda: ayah.sajda,
   }));
 
   const surahPayload = {
