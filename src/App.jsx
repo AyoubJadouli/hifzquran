@@ -22,6 +22,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LocaleRedirect />} />
           <Route path="/:lang" element={<LandingPage />} />
+          <Route path="/:lang/landing" element={<LandingPage />} />
           <Route path="/:lang/features" element={<FeaturesPage />} />
           <Route path="/:lang/about" element={<AboutPage />} />
           <Route path="/features" element={<Navigate to="/en/features" replace />} />

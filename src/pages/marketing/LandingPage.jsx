@@ -17,10 +17,10 @@ export default function LandingPage() {
       <SeoHead
         title={`${t.name} | ${t.hero}`}
         description={t.desc}
-        canonical={`https://hifdquran.los.ma/${lang}`}
+        canonical={`https://hifdquran.los.ma/${lang}/landing`}
         keywords="hifz quran app, quran memorization app, memorize quran with your own voice, quran memorization by listening, record your recitation quran app, hifz app with repeat playback"
         lang={lang}
-        alternates={alternates}
+        alternates={alternates.map((item) => ({ ...item, href: `https://hifdquran.los.ma/${item.hrefLang}/landing` }))}
       />
 
       <section className="text-center py-8">
@@ -38,7 +38,7 @@ export default function LandingPage() {
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link to="/app/Home" className="px-5 py-3 rounded-xl bg-[#D4AF37] text-[#2B241B] font-semibold">{t.openApp}</Link>
           <Link to={`/${lang}/features`} className="px-5 py-3 rounded-xl border border-[#D4AF37] font-semibold">{t.features}</Link>
-          <a href="https://makne.app" target="_blank" rel="noreferrer" className="px-5 py-3 rounded-xl border border-[#F2D675]/50">{t.visitMakne}</a>
+          <a href="https://ai7sky.com/" target="_blank" rel="noreferrer" className="px-5 py-3 rounded-xl border border-[#F2D675]/50">{t.visitMakne}</a>
         </div>
       </section>
 

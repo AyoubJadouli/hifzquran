@@ -9,8 +9,10 @@ import { useThemeColors } from "../components/useThemeColors";
 import SurahSelector from "../components/home/SurahSelector";
 import LuxuryControlBar from "../components/home/LuxuryControlBar";
 import LuxuryVerseStack from "../components/home/LuxuryVerseStack";
+import FullChunkView from "../components/home/FullChunkView";
 import PlaybackStatusBar from "../components/home/PlaybackStatusBar";
 import OptionsSheet from "../components/home/OptionsSheet";
+import { Expand } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -42,6 +44,7 @@ export default function Home() {
   const [autoAdvanceChunk, setAutoAdvanceChunk] = useState(true);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [showRecitePrompt, setShowRecitePrompt] = useState(false);
+  const [fullChunkMode, setFullChunkMode] = useState(false);
 
   // Refs for playback engine
   const playbackRef = useRef({ stop: false, pause: false, skipToVerse: null });
@@ -497,6 +500,21 @@ export default function Home() {
         <SurahSelector currentSurah={surah} onSelectSurah={loadSurah} />
       </div>
 
+      <div className="px-4 pt-2 flex justify-end">
+        <button
+          onClick={() => setFullChunkMode((prev) => !prev)}
+          className="w-11 h-11 rounded-full flex items-center justify-center transition-all"
+          style={{
+            background: fullChunkMode ? "linear-gradient(160deg, #D4AF37 0%, #B98218 100%)" : "rgba(212,175,55,0.12)",
+            border: `1px solid ${fullChunkMode ? "#8E6415" : "rgba(212,175,55,0.28)"}`,
+            boxShadow: fullChunkMode ? "0 4px 18px rgba(183,130,24,0.35)" : "0 2px 10px rgba(0,0,0,0.12)",
+          }}
+          title={fullChunkMode ? "Switch to ayat mode" : "Switch to full chunk mode"}
+        >
+          <Expand className="w-4.5 h-4.5" style={{ color: fullChunkMode ? "#2B241B" : "#D4AF37" }} />
+        </button>
+      </div>
+
       {/* Zone 3 — Luxury Verse Stack */}
       {showRecitePrompt && (
         <div className="mx-4 mt-2 rounded-2xl border border-[#D4AF3766] bg-[#0E5B3D] p-3 text-[#F2D675]">
@@ -518,12 +536,19 @@ export default function Home() {
           transition={{ duration: 0.25, ease: "easeInOut" }}
           className="flex-1 overflow-hidden"
         >
-          <LuxuryVerseStack
-            verses={chunkVerses}
-            currentVerseIndex={currentVerseIndex}
-            onVerseChange={setCurrentVerseIndex}
-            isPlaying={isActive}
-          />
+          {fullChunkMode ? (
+            <FullChunkView
+              verses={chunkVerses}
+              language={settings.display_language || "en"}
+            />
+          ) : (
+            <LuxuryVerseStack
+              verses={chunkVerses}
+              currentVerseIndex={currentVerseIndex}
+              onVerseChange={setCurrentVerseIndex}
+              isPlaying={isActive}
+            />
+          )}
         </motion.div>
       </AnimatePresence>
 

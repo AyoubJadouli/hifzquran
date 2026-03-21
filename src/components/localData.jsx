@@ -59,6 +59,16 @@ async function deleteLargeValue(key) {
   });
 }
 
+async function clearLargeStore() {
+  const db = await openDB();
+  return await new Promise((resolve, reject) => {
+    const tx = db.transaction(LARGE_STORE, 'readwrite');
+    tx.objectStore(LARGE_STORE).clear();
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error || new Error('Failed to clear IndexedDB storage'));
+  });
+}
+
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 }
@@ -161,3 +171,55 @@ export const localChunkIndex = {
   set: async (value) => setLargeValue('ChunkIndex', value || {}),
   clear: async () => deleteLargeValue('ChunkIndex'),
 };
+
+export async function getStorageUsageEstimate() {
+  let usedBytes = 0;
+  let quotaBytes = 5 * 1024 * 1024;
+
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      const value = localStorage.getItem(key) || '';
+      usedBytes += (key.length + value.length) * 2;
+    }
+  } catch {}
+
+  try {
+    const chunkIndex = await getLargeValue('ChunkIndex');
+    if (chunkIndex) {
+      usedBytes += JSON.stringify(chunkIndex).length * 2;
+    }
+  } catch {}
+
+  try {
+    if (navigator.storage?.estimate) {
+      const estimate = await navigator.storage.estimate();
+      if (estimate.usage) usedBytes = Math.max(usedBytes, estimate.usage);
+      if (estimate.quota) quotaBytes = estimate.quota;
+    }
+  } catch {}
+
+  return { usedBytes, quotaBytes };
+}
+
+export async function clearAppStoragePreserveSettings() {
+  const savedSettingsRaw = localStorage.getItem('hifz_UserSettings');
+
+  try {
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('hifz_') && key !== 'hifz_UserSettings') keys.push(key);
+    }
+    keys.forEach((key) => localStorage.removeItem(key));
+  } catch {}
+
+  try {
+    await clearLargeStore();
+  } catch {}
+
+  if (savedSettingsRaw) {
+    localStorage.setItem('hifz_UserSettings', savedSettingsRaw);
+  }
+}

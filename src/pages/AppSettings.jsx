@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getAppT } from "../components/appI18n";
 import { useSettings } from "../components/useSettings";
 import {
@@ -8,13 +8,13 @@ import {
   fetchSurahList,
   generateChunks,
 } from "../components/quranData";
-import { localChunkIndex, localEntities } from "../components/localData";
+import { clearAppStoragePreserveSettings, getStorageUsageEstimate, localChunkIndex, localEntities } from "../components/localData";
 // No server needed — all data is stored locally in the browser
 import { useTheme } from "../components/ThemeContext";
 import { useThemeColors } from "../components/useThemeColors";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { CheckCircle2, Loader2, Moon, Sun } from "lucide-react";
+import { CheckCircle2, Loader2, Moon, Sun, Trash2 } from "lucide-react";
 
 const LANGUAGES = {
   en: "English", ar: "العربية", fr: "Français", es: "Español",
@@ -47,6 +47,8 @@ export default function AppSettings() {
   const i18n = getAppT(settings.display_language);
   const [generatingChunks, setGeneratingChunks] = useState(false);
   const [chunkGenerationResult, setChunkGenerationResult] = useState(null);
+  const [clearingStorage, setClearingStorage] = useState(false);
+  const [storageInfo, setStorageInfo] = useState({ usedBytes: 0, quotaBytes: 0 });
 
   const hifzOrders = {
     forward: i18n.settingsHifzOrderForward,
@@ -54,6 +56,10 @@ export default function AppSettings() {
     revelation_forward: i18n.settingsHifzOrderRevelationForward,
     revelation_reverse: i18n.settingsHifzOrderRevelationReverse,
   };
+
+  useEffect(() => {
+    refreshStorageUsage();
+  }, []);
 
   if (loading) {
     return (
@@ -102,12 +108,35 @@ export default function AppSettings() {
         surahCount: surahList.length,
         chunkCount: totalChunks,
       });
+      await refreshStorageUsage();
     } catch (error) {
       setChunkGenerationResult({ error: error?.message || "Failed to generate chunks" });
     } finally {
       setGeneratingChunks(false);
     }
   }
+
+  async function refreshStorageUsage() {
+    try {
+      const usage = await getStorageUsageEstimate();
+      setStorageInfo(usage);
+    } catch {}
+  }
+
+  async function handleClearStorage() {
+    setClearingStorage(true);
+    try {
+      await clearAppStoragePreserveSettings();
+      setChunkGenerationResult(null);
+      await refreshStorageUsage();
+    } finally {
+      setClearingStorage(false);
+    }
+  }
+
+  const usedMB = (storageInfo.usedBytes / (1024 * 1024)).toFixed(2);
+  const quotaMB = (storageInfo.quotaBytes / (1024 * 1024)).toFixed(2);
+  const usagePct = storageInfo.quotaBytes > 0 ? Math.min(100, (storageInfo.usedBytes / storageInfo.quotaBytes) * 100) : 0;
 
   return (
     <div
@@ -207,6 +236,51 @@ export default function AppSettings() {
                 </span>
               </div>
             ) : null}
+          </div>
+        </LuxSection>
+
+        <LuxSection title={i18n.settingsSectionStorage} t={t}>
+          <div className="space-y-3">
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="font-inter font-medium text-sm" style={{ color: t.textPrimary }}>
+                  {i18n.settingsStorageUsage}
+                </span>
+                <span className="font-inter text-xs" style={{ color: t.textMuted }}>
+                  {i18n.settingsStorageUsageValue({ used: usedMB, total: quotaMB })}
+                </span>
+              </div>
+              <div className="rounded-full overflow-hidden" style={{ height: "7px", background: "rgba(212,175,55,0.12)", border: `1px solid ${t.cardBorder}` }}>
+                <div
+                  style={{
+                    width: `${usagePct}%`,
+                    height: "100%",
+                    background: `linear-gradient(90deg, ${t.gold}, ${t.goldLight})`,
+                    transition: "width 0.3s ease",
+                  }}
+                />
+              </div>
+            </div>
+
+            <p className="font-inter text-xs" style={{ color: t.textMuted, lineHeight: 1.6 }}>
+              {i18n.settingsStorageCleanupHint}
+            </p>
+
+            <button
+              onClick={handleClearStorage}
+              disabled={clearingStorage}
+              className="w-full rounded-xl px-4 py-3 font-inter text-sm font-semibold transition-all flex items-center justify-center gap-2"
+              style={{
+                background: clearingStorage ? "rgba(190, 24, 93, 0.10)" : "linear-gradient(160deg, #7E1C10 0%, #A92E16 60%, #C44A1A 100%)",
+                color: "#FFF4EC",
+                border: "1px solid rgba(212,175,55,0.35)",
+                boxShadow: clearingStorage ? "none" : "0 4px 16px rgba(126,28,16,0.35)",
+                opacity: clearingStorage ? 0.8 : 1,
+              }}
+            >
+              {clearingStorage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              {clearingStorage ? i18n.settingsClearStorageRunning : i18n.settingsClearStorageButton}
+            </button>
           </div>
         </LuxSection>
 
