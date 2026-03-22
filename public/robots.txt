@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hifdquran.los.ma/sitemap.xml
+Sitemap: https://hifzquran.los.ma/sitemap.xml

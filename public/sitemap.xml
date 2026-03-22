@@ -1,233 +1,233 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://hifdquran.los.ma/</loc>
+    <loc>https://hifzquran.los.ma/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/en</loc>
+    <loc>https://hifzquran.los.ma/en</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/en/landing</loc>
+    <loc>https://hifzquran.los.ma/en/landing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/en/features</loc>
+    <loc>https://hifzquran.los.ma/en/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/en/about</loc>
+    <loc>https://hifzquran.los.ma/en/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/ar</loc>
+    <loc>https://hifzquran.los.ma/ar</loc>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/ar/landing</loc>
+    <loc>https://hifzquran.los.ma/ar/landing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/ar/features</loc>
+    <loc>https://hifzquran.los.ma/ar/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/ar/about</loc>
+    <loc>https://hifzquran.los.ma/ar/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/fr</loc>
+    <loc>https://hifzquran.los.ma/fr</loc>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/fr/landing</loc>
+    <loc>https://hifzquran.los.ma/fr/landing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/fr/features</loc>
+    <loc>https://hifzquran.los.ma/fr/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/fr/about</loc>
+    <loc>https://hifzquran.los.ma/fr/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/es</loc>
+    <loc>https://hifzquran.los.ma/es</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/es/landing</loc>
+    <loc>https://hifzquran.los.ma/es/landing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/es/features</loc>
+    <loc>https://hifzquran.los.ma/es/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/es/about</loc>
+    <loc>https://hifzquran.los.ma/es/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/de</loc>
+    <loc>https://hifzquran.los.ma/de</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/de/landing</loc>
+    <loc>https://hifzquran.los.ma/de/landing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/de/features</loc>
+    <loc>https://hifzquran.los.ma/de/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/de/about</loc>
+    <loc>https://hifzquran.los.ma/de/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/tr</loc>
+    <loc>https://hifzquran.los.ma/tr</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/tr/landing</loc>
+    <loc>https://hifzquran.los.ma/tr/landing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/tr/features</loc>
+    <loc>https://hifzquran.los.ma/tr/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/tr/about</loc>
+    <loc>https://hifzquran.los.ma/tr/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/ur</loc>
+    <loc>https://hifzquran.los.ma/ur</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/ur/landing</loc>
+    <loc>https://hifzquran.los.ma/ur/landing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/ur/features</loc>
+    <loc>https://hifzquran.los.ma/ur/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/ur/about</loc>
+    <loc>https://hifzquran.los.ma/ur/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/id</loc>
+    <loc>https://hifzquran.los.ma/id</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/id/landing</loc>
+    <loc>https://hifzquran.los.ma/id/landing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/id/features</loc>
+    <loc>https://hifzquran.los.ma/id/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/id/about</loc>
+    <loc>https://hifzquran.los.ma/id/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/pt</loc>
+    <loc>https://hifzquran.los.ma/pt</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/pt/landing</loc>
+    <loc>https://hifzquran.los.ma/pt/landing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/pt/features</loc>
+    <loc>https://hifzquran.los.ma/pt/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/pt/about</loc>
+    <loc>https://hifzquran.los.ma/pt/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/zh</loc>
+    <loc>https://hifzquran.los.ma/zh</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/zh/landing</loc>
+    <loc>https://hifzquran.los.ma/zh/landing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/zh/features</loc>
+    <loc>https://hifzquran.los.ma/zh/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/zh/about</loc>
+    <loc>https://hifzquran.los.ma/zh/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://hifdquran.los.ma/features</loc>
+    <loc>https://hifzquran.los.ma/features</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/about</loc>
+    <loc>https://hifzquran.los.ma/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://hifdquran.los.ma/download</loc>
+    <loc>https://hifzquran.los.ma/download</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
