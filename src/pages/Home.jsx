@@ -192,10 +192,17 @@ export default function Home() {
     setSurah(surahData);
 
     const existing = await getChunksForSurah(surahData, surahNum);
+    const savedChunkId = settings.last_chunk_id;
+    const initialChunkIndex = Math.max(
+      0,
+      existing.findIndex((chunk) => chunk.id === savedChunkId)
+    );
+    const initialChunk = existing[initialChunkIndex] || existing[0];
 
     setChunks(existing);
-    setCurrentChunkIndex(0);
-    await loadRecordings(existing[0]?.id);
+    setCurrentChunkIndex(initialChunkIndex);
+    setCurrentVerseIndex(0);
+    await loadRecordings(initialChunk?.id);
     setLoading(false);
   }
 
@@ -255,12 +262,18 @@ export default function Home() {
     setSurah(surahData);
 
     const existing = await getChunksForSurah(surahData, surahNum);
+    const savedChunkId = settings.last_surah_number === surahNum ? settings.last_chunk_id : null;
+    const nextChunkIndex = Math.max(
+      0,
+      existing.findIndex((chunk) => chunk.id === savedChunkId)
+    );
+    const nextChunk = existing[nextChunkIndex] || existing[0];
 
     setChunks(existing);
-    setCurrentChunkIndex(0);
+    setCurrentChunkIndex(nextChunkIndex);
     setCurrentVerseIndex(0);
-    updateSettings({ last_surah_number: surahNum, last_chunk_id: existing[0]?.id });
-    await loadRecordings(existing[0]?.id);
+    updateSettings({ last_surah_number: surahNum, last_chunk_id: nextChunk?.id || null });
+    await loadRecordings(nextChunk?.id);
     setLoading(false);
   }
 
@@ -451,6 +464,15 @@ export default function Home() {
   // ── Derived data ─────────────────────────────────────────────────
 
   const currentChunk = chunks[currentChunkIndex];
+
+  useEffect(() => {
+    if (!currentChunk) return;
+    updateSettings({
+      last_surah_number: currentChunk.surah_number,
+      last_chunk_id: currentChunk.id,
+    });
+  }, [currentChunk?.id]);
+
   const chunkVerses = surah && currentChunk
     ? surah.verses.filter(v => v.number >= currentChunk.start_verse && v.number <= currentChunk.end_verse)
     : [];

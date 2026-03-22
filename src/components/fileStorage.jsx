@@ -1,5 +1,8 @@
 // IndexedDB-based audio blob storage
-// Stores blobs locally and returns a local-audio:// reference
+// Stores blobs locally and returns a local-audio:// reference.
+// On iOS Safari, audio playback is more reliable when the stored blob has an
+// explicit, playable MIME type and when generated object URLs are revoked
+// carefully after use.
 
 const DB_NAME = 'hifz_audio';
 const STORE = 'files';
@@ -22,10 +25,11 @@ function generateFileId() {
 
 export async function storeAudioBlob(blob) {
   const id = generateFileId();
+  const normalizedBlob = normalizeAudioBlob(blob);
   const db = await openDB();
   await new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).put(blob, id);
+    tx.objectStore(STORE).put(normalizedBlob, id);
     tx.oncomplete = resolve;
     tx.onerror = reject;
   });
@@ -43,7 +47,9 @@ export async function resolveAudioUrl(fileRef) {
     req.onsuccess = () => resolve(req.result);
     req.onerror = reject;
   });
-  return blob ? URL.createObjectURL(blob) : null;
+  if (!blob) return null;
+  const playableBlob = normalizeAudioBlob(blob);
+  return URL.createObjectURL(playableBlob);
 }
 
 export async function deleteAudioBlob(fileRef) {
@@ -56,4 +62,20 @@ export async function deleteAudioBlob(fileRef) {
     tx.oncomplete = resolve;
     tx.onerror = reject;
   });
+}
+
+function normalizeAudioBlob(blob) {
+  if (!blob) return blob;
+  const sourceType = (blob.type || '').toLowerCase();
+  let targetType = sourceType;
+
+  if (!targetType || targetType === 'audio/webm') {
+    // Safari/iOS can fail to play blobs saved as generic/implicit webm.
+    // Explicit codecs information improves compatibility checks, while still
+    // preserving playback in Chromium-based browsers.
+    targetType = 'audio/webm;codecs=opus';
+  }
+
+  if (sourceType === targetType) return blob;
+  return new Blob([blob], { type: targetType });
 }

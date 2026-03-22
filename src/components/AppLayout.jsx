@@ -71,26 +71,42 @@ export default function AppLayout() {
               const isActive =
                 location.pathname === path ||
                 (path === "/Home" && location.pathname === "/");
+              const iconColor = isActive ? "#F7D774" : "rgba(233, 200, 92, 0.78)";
+              const textColor = isActive ? "#FFF1B8" : "rgba(245, 215, 120, 0.86)";
               return (
                 <Link
                   key={path}
                   to={path}
                   className="flex flex-col items-center gap-0.5 px-3 py-1.5 transition-all"
+                  style={{ filter: isActive ? "drop-shadow(0 0 10px rgba(242,214,117,0.42))" : "drop-shadow(0 0 6px rgba(212,175,55,0.22))" }}
                 >
                   <Icon
-                    className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : ""}`}
-                    style={{ color: isActive ? "#F2D675" : "rgba(212,175,55,0.42)" }}
+                    className={`w-5.5 h-5.5 ${isActive ? "stroke-[2.5]" : "stroke-[2.35]"}`}
+                    style={{
+                      color: iconColor,
+                      filter: isActive
+                        ? "drop-shadow(0 0 8px rgba(242,214,117,0.55))"
+                        : "drop-shadow(0 0 6px rgba(212,175,55,0.28))",
+                    }}
                   />
                   <span
-                    className={`text-[10px] font-inter ${isActive ? "font-bold" : "font-medium"}`}
-                    style={{ color: isActive ? "#F2D675" : "rgba(212,175,55,0.42)" }}
+                    className={`text-[11px] font-inter tracking-[0.03em] ${isActive ? "font-bold" : "font-semibold"}`}
+                    style={{
+                      color: textColor,
+                      textShadow: isActive
+                        ? "0 0 10px rgba(242,214,117,0.38), 0 1px 0 rgba(67,46,8,0.45)"
+                        : "0 0 8px rgba(212,175,55,0.22)",
+                    }}
                   >
                     {label}
                   </span>
                   {isActive && (
                     <div
-                      className="w-1 h-1 rounded-full -mt-0.5"
-                      style={{ background: "#D4AF37" }}
+                      className="w-1.5 h-1.5 rounded-full -mt-0.5"
+                      style={{
+                        background: "radial-gradient(circle, #FFF1B8 0%, #D4AF37 68%, #8E6415 100%)",
+                        boxShadow: "0 0 10px rgba(242,214,117,0.7)",
+                      }}
                     />
                   )}
                 </Link>
