@@ -141,18 +141,36 @@ function VerseCard({ verse, isLast }) {
 
             <GoldSeparator />
 
-            {/* Translation */}
+            {/* Transliteration */}
             <p
               className="font-inter text-center leading-relaxed"
               style={{ fontSize: "12px", color: "#6B6253", lineHeight: 1.65 }}
             >
-              {verse.translation}
+              {verse.transliteration || verse.translation}
             </p>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+function getSupportedRecordingMimeType() {
+  if (typeof MediaRecorder === "undefined") return "";
+  const candidates = [
+    "audio/mp4",
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/ogg;codecs=opus",
+  ];
+
+  return candidates.find((type) => {
+    try {
+      return MediaRecorder.isTypeSupported?.(type);
+    } catch {
+      return false;
+    }
+  }) || "";
 }
 
 function PrimaryGoldButton({ onClick, disabled, isLast, isProcessing }) {
@@ -403,7 +421,10 @@ export default function Record() {
   function beginRecording(stream) {
     if (!stream) return;
     audioChunksRef.current = [];
-    const recorder = new MediaRecorder(stream);
+    const mimeType = getSupportedRecordingMimeType();
+    const recorder = mimeType
+      ? new MediaRecorder(stream, { mimeType })
+      : new MediaRecorder(stream);
     recorder.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
     recorder.start();
     mediaRecorderRef.current = recorder;
@@ -415,7 +436,8 @@ export default function Record() {
       const rec = mediaRecorderRef.current;
       if (!rec || rec.state === "inactive") { resolve(null); return; }
       rec.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const recordedType = rec.mimeType || audioChunksRef.current[0]?.type || "audio/webm";
+        const blob = new Blob(audioChunksRef.current, { type: recordedType });
         resolve(blob);
       };
       rec.stop();

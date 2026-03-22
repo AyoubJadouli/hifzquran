@@ -11,6 +11,24 @@ import { useSettings } from "../components/useSettings";
 const MIN_SECONDS = 5;
 const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
+function getSupportedRecordingMimeType() {
+  if (typeof MediaRecorder === "undefined") return "";
+  const candidates = [
+    "audio/mp4",
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/ogg;codecs=opus",
+  ];
+
+  return candidates.find((type) => {
+    try {
+      return MediaRecorder.isTypeSupported?.(type);
+    } catch {
+      return false;
+    }
+  }) || "";
+}
+
 export default function Recite() {
   const { chunkId } = useParams();
   const navigate = useNavigate();
@@ -90,7 +108,10 @@ export default function Recite() {
       setStream(userStream);
       chunksRef.current = [];
 
-      const rec = new MediaRecorder(userStream);
+      const mimeType = getSupportedRecordingMimeType();
+      const rec = mimeType
+        ? new MediaRecorder(userStream, { mimeType })
+        : new MediaRecorder(userStream);
       rec.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
@@ -119,7 +140,10 @@ export default function Recite() {
     if (!rec || rec.state === "inactive") return;
 
     const blob = await new Promise((resolve) => {
-      rec.onstop = () => resolve(new Blob(chunksRef.current, { type: "audio/webm" }));
+      rec.onstop = () => {
+        const recordedType = rec.mimeType || chunksRef.current[0]?.type || "audio/webm";
+        resolve(new Blob(chunksRef.current, { type: recordedType }));
+      };
       rec.stop();
     });
 
