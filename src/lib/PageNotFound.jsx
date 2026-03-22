@@ -1,8 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, Home } from "lucide-react";
+import { getAppT } from "../components/appI18n";
+import { useSettings } from "../components/useSettings";
 
 export default function PageNotFound() {
+  const { settings } = useSettings();
+  const i18n = getAppT(settings?.display_language);
+
   return (
     <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center p-6">
       <div className="text-center max-w-sm">
@@ -18,7 +23,7 @@ export default function PageNotFound() {
           className="inline-flex items-center gap-2 px-6 py-3 bg-[#0D5C46] text-white rounded-xl font-inter font-medium text-sm hover:bg-[#0a4a38] transition-colors"
         >
           <Home className="w-4 h-4" />
-          Go Home
+          {i18n.commonBackToHome || "Back to Hifz"}
         </Link>
       </div>
     </div>

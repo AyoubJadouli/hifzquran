@@ -1,11 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { fetchSurahList, fetchSurahVersesForLanguage } from "../components/quranData";
 import { localEntities } from "../components/localData";
 import { getAppT } from "../components/appI18n";
 import { useSettings } from "../components/useSettings";
 import { useThemeColors } from "../components/useThemeColors";
-import { Bookmark, Loader2, MapPinned } from "lucide-react";
+import { Loader2, MapPinned, Navigation, BookmarkPlus } from "lucide-react";
+
+const readerPatternOverlay = "linear-gradient(rgba(242,214,117,0.07), rgba(242,214,117,0.07))";
+const readerPatternImage = "url('/assets/islamic_pattern_clean_black.png')";
 
 function getSajdaLabel(sajda) {
   if (!sajda) return null;
@@ -25,11 +28,20 @@ export default function Reader() {
   const [surah, setSurah] = useState(null);
   const [loading, setLoading] = useState(true);
   const [bookmark, setBookmark] = useState(null);
+  const [lastVisited, setLastVisited] = useState(null);
   const [savingBookmark, setSavingBookmark] = useState(false);
+  const [savingVisited, setSavingVisited] = useState(false);
   const [justMarkedAyah, setJustMarkedAyah] = useState(null);
+  const [justVisitedAyah, setJustVisitedAyah] = useState(null);
+  const markResetTimerRef = useRef(null);
+  const visitResetTimerRef = useRef(null);
 
   useEffect(() => {
     bootstrap();
+    return () => {
+      if (markResetTimerRef.current) clearTimeout(markResetTimerRef.current);
+      if (visitResetTimerRef.current) clearTimeout(visitResetTimerRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -40,15 +52,18 @@ export default function Reader() {
 
   async function bootstrap() {
     setLoading(true);
-    const [surahList, bookmarks] = await Promise.all([
+    const [surahList, bookmarks, visits] = await Promise.all([
       fetchSurahList(),
-      localEntities.Bookmark.list("-updated_date", 1),
+      localEntities.Bookmark.filter({ label: "manual_mark" }, "-updated_date", 1),
+      localEntities.Bookmark.filter({ label: "last_read" }, "-updated_date", 1),
     ]);
 
     setSurahs(surahList);
     const activeBookmark = bookmarks[0] || null;
+    const activeVisit = visits[0] || null;
     setBookmark(activeBookmark);
-    setSurahNumber(activeBookmark?.surah_number || settings.last_surah_number || 1);
+    setLastVisited(activeVisit);
+    setSurahNumber(activeVisit?.surah_number || activeBookmark?.surah_number || settings.last_surah_number || 1);
     setLoading(false);
   }
 
@@ -65,17 +80,42 @@ export default function Reader() {
     setLoading(false);
   }
 
+  async function saveReaderPosition(verse) {
+    if (!surah || !verse) return;
+    setSavingVisited(true);
+    const existing = await localEntities.Bookmark.filter({ label: "last_read" }, "-updated_date", 1);
+    const current = existing[0] || null;
+    const payload = {
+      surah_number: surah.number,
+      ayah_number: verse.number,
+      label: "last_read",
+    };
+
+    let nextVisit;
+    if (current) {
+      nextVisit = await localEntities.Bookmark.update(current.id, payload);
+    } else {
+      nextVisit = await localEntities.Bookmark.create(payload);
+    }
+
+    setLastVisited(nextVisit);
+    setJustVisitedAyah(`${surah.number}:${verse.number}`);
+    if (visitResetTimerRef.current) clearTimeout(visitResetTimerRef.current);
+    visitResetTimerRef.current = setTimeout(() => setJustVisitedAyah(null), 900);
+    setSavingVisited(false);
+  }
+
   async function toggleBookmark(verse) {
     if (!surah || !verse || savingBookmark) return;
     setSavingBookmark(true);
 
-    const existing = await localEntities.Bookmark.list("-updated_date", 1);
+    const existing = await localEntities.Bookmark.filter({ label: "manual_mark" }, "-updated_date", 1);
     const current = existing[0] || null;
 
     const payload = {
       surah_number: surah.number,
       ayah_number: verse.number,
-      label: "last_read",
+      label: "manual_mark",
     };
 
     let nextBookmark;
@@ -87,7 +127,8 @@ export default function Reader() {
 
     setBookmark(nextBookmark);
     setJustMarkedAyah(`${surah.number}:${verse.number}`);
-    setTimeout(() => setJustMarkedAyah(null), 900);
+    if (markResetTimerRef.current) clearTimeout(markResetTimerRef.current);
+    markResetTimerRef.current = setTimeout(() => setJustMarkedAyah(null), 900);
     setSavingBookmark(false);
   }
 
@@ -100,6 +141,18 @@ export default function Reader() {
     }
 
     const target = document.getElementById(`reader-ayah-${surah.number}-${bookmark.ayah_number}`);
+    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function jumpToLastVisited() {
+    if (!lastVisited || lastVisited.surah_number !== surah?.number) {
+      if (lastVisited?.surah_number) {
+        setSurahNumber(lastVisited.surah_number);
+      }
+      return;
+    }
+
+    const target = document.getElementById(`reader-ayah-${surah.number}-${lastVisited.ayah_number}`);
     target?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -119,7 +172,7 @@ export default function Reader() {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden" style={{ background: t.pageBg, backgroundImage: t.pageBgPattern, backgroundSize: "48px 48px" }}>
+    <div className="flex flex-col h-full overflow-hidden" style={{ background: t.pageBg, backgroundImage: `${readerPatternOverlay}, ${readerPatternImage}, ${t.pageBgPattern}`, backgroundSize: "240px 240px, 240px 240px, 48px 48px", backgroundPosition: "center top, center top, center top", backgroundBlendMode: "screen, normal, normal" }}>
       <div className="flex-shrink-0 px-5 pt-5 pb-4 relative overflow-hidden" style={{ background: t.headerBg, boxShadow: "0 4px 20px rgba(0,0,0,0.35)" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: t.pageBgPattern, backgroundSize: "48px 48px" }} />
         <div className="relative z-10 flex justify-center">
@@ -142,21 +195,35 @@ export default function Reader() {
             }}
           >
             {surahs.map((item) => (
-              <option key={item.number} value={item.number} style={{ color: "#111" }}>
+              <option key={item.number} value={String(item.number)} style={{ color: "#111" }}>
                 {item.number}. {item.name_english}
               </option>
             ))}
           </select>
 
           <button
+            onClick={jumpToLastVisited}
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-all disabled:opacity-40"
+            title="Go to last visited"
+            style={{
+              background: lastVisited ? "rgba(212, 175, 55, 0.12)" : "rgba(212, 175, 55, 0.08)",
+              border: `1px solid ${lastVisited ? "rgba(212, 175, 55, 0.28)" : "rgba(212, 175, 55, 0.18)"}`,
+              boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+              opacity: lastVisited ? 1 : 0.72,
+            }}
+          >
+            <Navigation className="w-4.5 h-4.5" style={{ color: t.gold }} />
+          </button>
+
+          <button
             onClick={jumpToBookmark}
-            disabled={!bookmark}
             className="w-11 h-11 rounded-full flex items-center justify-center transition-all disabled:opacity-40"
             title="Go to marker"
             style={{
               background: bookmark ? "rgba(212, 175, 55, 0.12)" : "rgba(212, 175, 55, 0.08)",
               border: `1px solid ${bookmark ? "rgba(212, 175, 55, 0.28)" : "rgba(212, 175, 55, 0.18)"}`,
               boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+              opacity: bookmark ? 1 : 0.72,
             }}
           >
             <MapPinned className="w-4.5 h-4.5" style={{ color: t.gold }} />
@@ -168,7 +235,12 @@ export default function Reader() {
         <div
           className="rounded-[28px] px-5 py-6 relative overflow-hidden"
           style={{
-            background: t.cardBg,
+            background: `${t.cardBg}, url('/assets/islamic_pattern_girih.svg')`,
+            backgroundBlendMode: "normal, soft-light",
+            backgroundSize: "auto, 220px 220px",
+            backgroundPosition: "center center, center center",
+            backgroundRepeat: "repeat, repeat",
+            color: t.pageBg === "#0A0812" ? "rgba(212,175,55,0.10)" : "rgba(139,106,31,0.08)",
             border: `1px solid ${t.cardBorder}`,
             boxShadow: t.cardShadow,
           }}
@@ -180,8 +252,21 @@ export default function Reader() {
             </div>
           </div>
 
-          {bookmark ? (
-            <div className="flex justify-center mb-5">
+          <div className="flex flex-wrap justify-center gap-2 mb-5">
+            {lastVisited ? (
+              <div
+                className="rounded-full px-3 py-1.5 font-inter"
+                style={{
+                  background: "rgba(240,230,200,0.08)",
+                  border: "1px solid rgba(240,230,200,0.16)",
+                  color: t.textPrimary,
+                  fontSize: "11px",
+                }}
+              >
+                Last visited {lastVisited.surah_number}:{lastVisited.ayah_number}
+              </div>
+            ) : null}
+            {bookmark ? (
               <div
                 className="rounded-full px-3 py-1.5 font-inter"
                 style={{
@@ -193,8 +278,8 @@ export default function Reader() {
               >
                 Marked {bookmark.surah_number}:{bookmark.ayah_number}
               </div>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
 
           <div className="flex justify-center">
             <div
@@ -212,37 +297,76 @@ export default function Reader() {
             >
               {surah?.verses?.map((verse) => {
                 const isBookmarked = bookmarkKey === `${surah.number}:${verse.number}`;
+                const isLastVisited = !!lastVisited && `${lastVisited.surah_number}:${lastVisited.ayah_number}` === `${surah.number}:${verse.number}`;
                 const sajdaLabel = getSajdaLabel(verse.sajda);
 
                 return (
                   <span key={`${surah.number}-${verse.number}`} id={`reader-ayah-${surah.number}-${verse.number}`} className="inline">
-                    <span>{verse.arabic}</span>
-                    <motion.button
-                      onClick={() => toggleBookmark(verse)}
-                      disabled={savingBookmark}
-                      className="inline-flex items-center justify-center align-middle mx-1.5 rounded-full"
-                      animate={justMarkedAyah === `${surah.number}:${verse.number}` ? { scale: [1, 1.22, 1], boxShadow: ["0 0 0 rgba(212,175,55,0)", "0 0 18px rgba(212,175,55,0.55)", "0 0 0 rgba(212,175,55,0)"] } : { scale: 1, boxShadow: isBookmarked ? t.goldShadow : "none" }}
-                      transition={{ duration: 0.55, ease: "easeOut" }}
+                    <span
+                      onClick={() => saveReaderPosition(verse)}
+                      className="rounded-lg px-1 cursor-pointer transition-colors"
                       style={{
-                        width: "1.95rem",
-                        height: "1.95rem",
-                        background: isBookmarked ? t.goldGradient : "rgba(212,175,55,0.12)",
-                        border: `1px solid ${isBookmarked ? t.goldDark : "rgba(212,175,55,0.22)"}`,
-                        verticalAlign: "middle",
+                        background: isLastVisited ? "rgba(35,64,48,0.12)" : "transparent",
+                        boxShadow: justVisitedAyah === `${surah.number}:${verse.number}` ? "0 0 0 6px rgba(35,64,48,0.08)" : "none",
                       }}
-                      title={`Mark verse ${verse.number}`}
+                      title={`Save last visited verse ${verse.number}`}
                     >
-                      <span
-                        className="font-inter font-bold"
+                      {verse.arabic}
+                    </span>
+                    <span className="inline-flex items-center align-middle mx-1.5 gap-1">
+                      <motion.button
+                        type="button"
+                        onClick={() => saveReaderPosition(verse)}
+                        disabled={savingVisited}
+                        className="inline-flex items-center justify-center rounded-full"
+                        animate={justVisitedAyah === `${surah.number}:${verse.number}` ? { scale: [1, 1.16, 1], boxShadow: ["0 0 0 rgba(35,64,48,0)", "0 0 14px rgba(35,64,48,0.28)", "0 0 0 rgba(35,64,48,0)"] } : { scale: 1, boxShadow: isLastVisited ? "0 0 0 1px rgba(35,64,48,0.10)" : "none" }}
+                        transition={{ duration: 0.45, ease: "easeOut" }}
                         style={{
-                          fontSize: "0.78rem",
-                          color: isBookmarked ? "#2B241B" : t.gold,
-                          lineHeight: 1,
+                          width: "1.55rem",
+                          height: "1.55rem",
+                          background: isLastVisited ? "rgba(35,64,48,0.16)" : "rgba(35,64,48,0.08)",
+                          border: `1px solid ${isLastVisited ? "rgba(35,64,48,0.30)" : "rgba(35,64,48,0.18)"}`,
+                          color: "#234030",
+                          cursor: savingVisited ? "wait" : "pointer",
                         }}
+                        title={`Save as last visited verse ${verse.number}`}
                       >
-                        {verse.number}
-                      </span>
-                    </motion.button>
+                        <Navigation className="w-3 h-3" />
+                      </motion.button>
+
+                      <motion.button
+                        type="button"
+                        onClick={() => toggleBookmark(verse)}
+                        disabled={savingBookmark}
+                        className="inline-flex items-center justify-center rounded-full"
+                        animate={justMarkedAyah === `${surah.number}:${verse.number}` ? { scale: [1, 1.22, 1], boxShadow: ["0 0 0 rgba(212,175,55,0)", "0 0 18px rgba(212,175,55,0.55)", "0 0 0 rgba(212,175,55,0)"] } : { scale: 1, boxShadow: isBookmarked ? t.goldShadow : "none" }}
+                        transition={{ duration: 0.55, ease: "easeOut" }}
+                        style={{
+                          width: "1.95rem",
+                          height: "1.95rem",
+                          background: isBookmarked ? t.goldGradient : "rgba(212,175,55,0.12)",
+                          border: `1px solid ${isBookmarked ? t.goldDark : "rgba(212,175,55,0.22)"}`,
+                          verticalAlign: "middle",
+                          cursor: savingBookmark ? "wait" : "pointer",
+                        }}
+                        title={`Mark verse ${verse.number}`}
+                      >
+                        {isBookmarked ? (
+                          <span
+                            className="font-inter font-bold"
+                            style={{
+                              fontSize: "0.78rem",
+                              color: "#2B241B",
+                              lineHeight: 1,
+                            }}
+                          >
+                            {verse.number}
+                          </span>
+                        ) : (
+                          <BookmarkPlus className="w-3.5 h-3.5" style={{ color: t.gold }} />
+                        )}
+                      </motion.button>
+                    </span>
                     {sajdaLabel ? (
                       <span
                         className="inline-flex items-center align-middle mx-1 rounded-full px-2 py-0.5 font-inter"

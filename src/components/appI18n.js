@@ -11,7 +11,7 @@ function createTranslator(base, overrides = {}) {
 }
 
 const EN = {
-  navHome: "Home",
+  navHome: "Hifz",
   navReader: "Reader",
   navSurahs: "Surahs",
   navProgress: "Progress",
@@ -42,7 +42,7 @@ const EN = {
   commonRecite: "Recite",
   commonRedo: "Redo",
   commonPreview: "Preview",
-  commonBackToHome: "Back to Home",
+  commonBackToHome: "Back to Hifz",
 
   settingsTitle: "Settings",
   settingsSectionAppearance: "Appearance",
@@ -106,7 +106,7 @@ const EN = {
 };
 
 const AR = {
-  navHome: "الرئيسية",
+  navHome: "الحفظ",
   navReader: "المصحف",
   navSurahs: "السور",
   navProgress: "التقدم",
@@ -136,7 +136,7 @@ const AR = {
   commonRecite: "اختبر",
   commonRedo: "أعد",
   commonPreview: "معاينة",
-  commonBackToHome: "العودة للرئيسية",
+  commonBackToHome: "العودة إلى الحفظ",
 
   settingsTitle: "الإعدادات",
   settingsSectionAppearance: "المظهر",
@@ -200,7 +200,7 @@ const AR = {
 };
 
 const FR = {
-  navHome: "Accueil",
+  navHome: "Hifz",
   navSurahs: "Sourates",
   navProgress: "Progression",
   navSettings: "Paramètres",
@@ -228,7 +228,7 @@ const FR = {
   commonRecite: "Réciter",
   commonRedo: "Refaire",
   commonPreview: "Aperçu",
-  commonBackToHome: "Retour à l'accueil",
+  commonBackToHome: "Retour au Hifz",
   settingsTitle: "Paramètres",
   settingsSectionAppearance: "Apparence",
   settingsTheme: "Thème",
@@ -263,7 +263,7 @@ const FR = {
 };
 
 const ES = {
-  navHome: "Inicio",
+  navHome: "Hifz",
   navSurahs: "Suras",
   navProgress: "Progreso",
   navSettings: "Configuración",
@@ -291,7 +291,7 @@ const ES = {
   commonRecite: "Recitar",
   commonRedo: "Repetir",
   commonPreview: "Vista previa",
-  commonBackToHome: "Volver al inicio",
+  commonBackToHome: "Volver a Hifz",
   settingsTitle: "Configuración",
   settingsSectionAppearance: "Apariencia",
   settingsTheme: "Tema",
@@ -326,7 +326,7 @@ const ES = {
 };
 
 const DE = {
-  navHome: "Start",
+  navHome: "Hifz",
   navSurahs: "Suren",
   navProgress: "Fortschritt",
   navSettings: "Einstellungen",
@@ -354,7 +354,7 @@ const DE = {
   commonRecite: "Rezitation",
   commonRedo: "Wiederholen",
   commonPreview: "Vorschau",
-  commonBackToHome: "Zurück zur Startseite",
+  commonBackToHome: "Zurück zu Hifz",
   settingsTitle: "Einstellungen",
   settingsSectionAppearance: "Darstellung",
   settingsTheme: "Design",
@@ -389,7 +389,7 @@ const DE = {
 };
 
 const TR = {
-  navHome: "Ana Sayfa",
+  navHome: "Hifz",
   navSurahs: "Sureler",
   navProgress: "İlerleme",
   navSettings: "Ayarlar",
@@ -417,7 +417,7 @@ const TR = {
   commonRecite: "Oku",
   commonRedo: "Yeniden",
   commonPreview: "Önizleme",
-  commonBackToHome: "Ana sayfaya dön",
+  commonBackToHome: "Hifz'e dön",
   settingsTitle: "Ayarlar",
   settingsSectionAppearance: "Görünüm",
   settingsTheme: "Tema",
@@ -452,7 +452,7 @@ const TR = {
 };
 
 const UR = {
-  navHome: "ہوم",
+  navHome: "حفظ",
   navSurahs: "سورتیں",
   navProgress: "پیش رفت",
   navSettings: "ترتیبات",
@@ -480,7 +480,7 @@ const UR = {
   commonRecite: "تلاوت",
   commonRedo: "دوبارہ",
   commonPreview: "پیش منظر",
-  commonBackToHome: "ہوم پر واپس جائیں",
+  commonBackToHome: "حفظ پر واپس جائیں",
   settingsTitle: "ترتیبات",
   settingsSectionAppearance: "ظاہری شکل",
   settingsTheme: "تھیم",
@@ -515,7 +515,7 @@ const UR = {
 };
 
 const ID = {
-  navHome: "Beranda",
+  navHome: "Hifz",
   navSurahs: "Surah",
   navProgress: "Progres",
   navSettings: "Pengaturan",
@@ -543,7 +543,7 @@ const ID = {
   commonRecite: "Setor",
   commonRedo: "Ulangi",
   commonPreview: "Pratinjau",
-  commonBackToHome: "Kembali ke beranda",
+  commonBackToHome: "Kembali ke Hifz",
   settingsTitle: "Pengaturan",
   settingsSectionAppearance: "Tampilan",
   settingsTheme: "Tema",
@@ -578,7 +578,7 @@ const ID = {
 };
 
 const PT = {
-  navHome: "Início",
+  navHome: "Hifz",
   navSurahs: "Suratas",
   navProgress: "Progresso",
   navSettings: "Configurações",
@@ -606,7 +606,7 @@ const PT = {
   commonRecite: "Recitar",
   commonRedo: "Refazer",
   commonPreview: "Prévia",
-  commonBackToHome: "Voltar para o início",
+  commonBackToHome: "Voltar para Hifz",
   settingsTitle: "Configurações",
   settingsSectionAppearance: "Aparência",
   settingsTheme: "Tema",
@@ -641,7 +641,7 @@ const PT = {
 };
 
 const ZH = {
-  navHome: "首页",
+  navHome: "Hifz",
   navSurahs: "章节",
   navProgress: "进度",
   navSettings: "设置",
@@ -669,7 +669,7 @@ const ZH = {
   commonRecite: "诵读",
   commonRedo: "重来",
   commonPreview: "预览",
-  commonBackToHome: "返回首页",
+  commonBackToHome: "返回 Hifz",
   settingsTitle: "设置",
   settingsSectionAppearance: "外观",
   settingsTheme: "主题",

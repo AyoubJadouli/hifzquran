@@ -540,6 +540,7 @@ export default function Home() {
             <FullChunkView
               verses={chunkVerses}
               language={settings.display_language || "en"}
+              currentVerseIndex={currentVerseIndex}
             />
           ) : (
             <LuxuryVerseStack

@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import { useThemeColors } from "./useThemeColors";
 import { getAppT, getAppDir, normalizeAppLang } from "./appI18n";
 import { useSettings } from "./useSettings";
-import { Home, BookOpen, ScrollText, BarChart3, Settings } from "lucide-react";
+import { Brain, BookOpen, ScrollText, BarChart3, Settings } from "lucide-react";
 
 export default function AppLayout() {
   const location = useLocation();
@@ -23,7 +23,7 @@ export default function AppLayout() {
   }, [dir, langAttr]);
 
   const NAV_ITEMS = [
-    { path: "/Home", icon: Home, label: i18n.navHome },
+    { path: "/Home", icon: Brain, label: i18n.navHome },
     { path: "/Reader", icon: ScrollText, label: i18n.navReader || "Reader" },
     { path: "/Surahs", icon: BookOpen, label: i18n.navSurahs },
     { path: "/Progress", icon: BarChart3, label: i18n.navProgress },

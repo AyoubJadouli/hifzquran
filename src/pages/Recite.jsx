@@ -5,6 +5,8 @@ import { deleteAudioBlob, resolveAudioUrl, storeAudioBlob } from "../components/
 import { fetchSurahVerses } from "../components/quranData";
 import WaveformVisualizer from "../components/record/WaveformVisualizer";
 import { X, Check, XIcon, Play, Pause, RotateCcw, Sparkles } from "lucide-react";
+import { getAppT } from "../components/appI18n";
+import { useSettings } from "../components/useSettings";
 
 const MIN_SECONDS = 5;
 const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
@@ -12,6 +14,8 @@ const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
 export default function Recite() {
   const { chunkId } = useParams();
   const navigate = useNavigate();
+  const { settings } = useSettings();
+  const i18n = getAppT(settings?.display_language);
 
   const [loading, setLoading] = useState(true);
   const [chunk, setChunk] = useState(null);
@@ -361,7 +365,7 @@ export default function Recite() {
             <button onClick={handleValidatePress} className="w-full h-12 rounded-xl bg-emerald-700 text-white font-semibold">✅ VALIDATE — I've Memorized This Chunk</button>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={handleTryAgain} className="h-11 rounded-xl border border-[#D4AF37] text-[#F2D675]">🔄 Try Again</button>
-              <button onClick={() => navigate("/app/Home")} className="h-11 rounded-xl border border-[#D4AF37] text-[#F2D675]">← Keep Practicing</button>
+              <button onClick={() => navigate("/app/Home")} className="h-11 rounded-xl border border-[#D4AF37] text-[#F2D675]">← {i18n.navHome || "Hifz"}</button>
             </div>
           </div>
         </>
@@ -409,7 +413,7 @@ export default function Recite() {
                 <p>🎉 You've completed {surah?.name_english}!</p>
               )}
             </div>
-            <button onClick={() => navigate("/app/Home")} className="mt-3 text-[#E9D8A6] inline-flex items-center gap-1"><Sparkles size={14} /> Back to Home</button>
+            <button onClick={() => navigate("/app/Home")} className="mt-3 text-[#E9D8A6] inline-flex items-center gap-1"><Sparkles size={14} /> {i18n.commonBackToHome || "Back to Hifz"}</button>
           </div>
         </div>
       )}

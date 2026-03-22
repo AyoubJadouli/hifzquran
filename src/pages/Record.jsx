@@ -4,7 +4,7 @@ import { localChunkIndex, localEntities } from "../components/localData";
 import { storeAudioBlob } from "../components/fileStorage";
 import { fetchSurahList, fetchSurahVersesForLanguage, generateChunks } from "../components/quranData";
 import { useSettings } from "../components/useSettings";
-import { X, RotateCcw, Play, Square, Loader2 } from "lucide-react";
+import { X, RotateCcw, Play, Square, Loader2, Clock3, History, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -264,6 +264,7 @@ export default function Record() {
   const [sessionElapsed, setSessionElapsed] = useState(0);
   const [verseElapsed, setVerseElapsed] = useState(0);
   const [recordedFiles, setRecordedFiles] = useState([]);
+  const [pastRecordings, setPastRecordings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [permissionError, setPermissionError] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -359,6 +360,8 @@ export default function Record() {
     if (!c) { navigate("/Home"); return; }
 
     setChunk(c);
+    const existingRecordings = await localEntities.Recording.filter({ chunk_id: chunkId });
+    setPastRecordings(existingRecordings);
     const surahData = await fetchSurahVersesForLanguage(
       c.surah_number,
       settings.display_language || "en",
@@ -509,7 +512,7 @@ export default function Record() {
         verseFileObjs.push({ verse_number: verses[currentVerseIndex]?.number, file_url, duration_ms: lastDuration });
       }
     }
-    await localEntities.Recording.create({
+    const savedRecording = await localEntities.Recording.create({
       chunk_id: chunkId,
       name: recordingName || "Recording",
       surah_number: chunk.surah_number,
@@ -518,6 +521,7 @@ export default function Record() {
       verse_files: verseFileObjs,
       total_duration_ms: totalMs,
     });
+    setPastRecordings((prev) => [savedRecording, ...prev]);
     await localEntities.Chunk.update(chunkId, { status: "in_progress" });
     setSaving(false);
     navigate(`/Home?chunk=${chunkId}`);
@@ -538,6 +542,13 @@ export default function Record() {
   }
 
   const fmt = s => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const fmtDurationMs = (ms) => {
+    if (!ms) return "0:00";
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${String(seconds).padStart(2, "0")}`;
+  };
 
   if (loading) {
     return (
@@ -651,17 +662,34 @@ export default function Record() {
 
       {/* ── Verse counter label ── */}
       <div className="relative z-10 flex-shrink-0 text-center pb-2">
-        <span
-          className="font-inter font-semibold"
-          style={{
-            fontSize: "13px",
-            color: "#E1BE59",
-            textShadow: "0 0 12px rgba(225,190,89,0.4)",
-            letterSpacing: "0.03em",
-          }}
-        >
-          Verse {currentVerseIndex + 1} of {verses.length}
-        </span>
+        <div className="flex flex-col items-center gap-2 px-4">
+          <span
+            className="font-inter font-semibold"
+            style={{
+              fontSize: "13px",
+              color: "#E1BE59",
+              textShadow: "0 0 12px rgba(225,190,89,0.4)",
+              letterSpacing: "0.03em",
+            }}
+          >
+            Verse {currentVerseIndex + 1} of {verses.length}
+          </span>
+          {currentVerse ? (
+            <div
+              className="max-w-md rounded-full px-4 py-2 font-inter"
+              style={{
+                background: "rgba(242,214,117,0.12)",
+                border: "1px solid rgba(242,214,117,0.45)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+              }}
+            >
+              <div className="flex items-center justify-center gap-2" style={{ color: "#FFF4CC" }}>
+                <CheckCircle2 className="w-4 h-4" style={{ color: "#F2D675" }} />
+                <span className="text-xs font-semibold tracking-[0.08em] uppercase">Currently practicing Ayah {currentVerse.number}</span>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {/* ── Verse Card (flex-1) ── */}
@@ -732,6 +760,60 @@ export default function Record() {
             variant={isPreviewing ? "preview-active" : "parchment"}
           />
         </div>
+
+        <div className="px-4 pt-1">
+          <div
+            className="rounded-2xl p-3.5"
+            style={{
+              background: "rgba(6,33,22,0.28)",
+              border: "1px solid rgba(212,175,55,0.24)",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.16)",
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2.5">
+              <History className="w-4 h-4" style={{ color: "#F2D675" }} />
+              <p className="font-inter font-semibold" style={{ fontSize: "12px", color: "#F2D675", letterSpacing: "0.04em" }}>
+                Previous recordings for this chunk
+              </p>
+            </div>
+
+            {pastRecordings.length === 0 ? (
+              <p className="font-inter" style={{ fontSize: "12px", color: "rgba(240,230,200,0.72)" }}>
+                No past recordings yet. Your saved recitations will appear here.
+              </p>
+            ) : (
+              <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                {pastRecordings.map((recording) => (
+                  <div
+                    key={recording.id}
+                    className="rounded-xl px-3 py-2.5"
+                    style={{
+                      background: "rgba(255,249,240,0.08)",
+                      border: "1px solid rgba(212,175,55,0.18)",
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-inter font-semibold truncate" style={{ fontSize: "13px", color: "#FFF4CC" }}>
+                          {recording.name || "Recording"}
+                        </p>
+                        <p className="font-inter" style={{ fontSize: "11px", color: "rgba(240,230,200,0.72)" }}>
+                          Verses {recording.start_verse}–{recording.end_verse} · {recording.verse_files?.length || 0} ayat
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0" style={{ color: "#EED98B" }}>
+                        <Clock3 className="w-3.5 h-3.5" />
+                        <span className="font-inter font-medium" style={{ fontSize: "11px" }}>
+                          {fmtDurationMs(recording.total_duration_ms)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ── Save Dialog ── */}
@@ -765,8 +847,14 @@ export default function Record() {
                 value={recordingName}
                 onChange={e => setRecordingName(e.target.value)}
                 placeholder="Morning Session 1"
-                className="font-inter"
-                style={{ background: "#FFF9F0", border: "1px solid #D4AF37" }}
+                className="font-inter text-[#1F170F] placeholder:text-[#7A6B55]"
+                style={{
+                  background: "#FFF9F0",
+                  border: "1.5px solid #B98218",
+                  color: "#1F170F",
+                  fontWeight: 600,
+                  boxShadow: "inset 0 1px 1px rgba(255,255,255,0.65), 0 1px 0 rgba(139,100,27,0.08)",
+                }}
                 autoFocus
               />
             </div>
