@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { BookOpen, Home } from "lucide-react";
 import { getAppT } from "../components/appI18n";
 import { useSettings } from "../components/useSettings";
+import SeoHead from "../components/SeoHead";
 
 export default function PageNotFound() {
   const { settings } = useSettings();
@@ -10,6 +11,12 @@ export default function PageNotFound() {
 
   return (
     <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center p-6">
+      <SeoHead
+        title="Page Not Found | Hifd Quran"
+        description="The page you are looking for does not exist. Return to Hifd Quran to continue Quran memorization practice."
+        canonical="https://hifzquran.los.ma/404"
+        robots="noindex, follow"
+      />
       <div className="text-center max-w-sm">
         <div className="w-16 h-16 rounded-2xl bg-[#0D5C46]/10 flex items-center justify-center mx-auto mb-6">
           <BookOpen className="w-8 h-8 text-[#0D5C46]" />

@@ -17,10 +17,13 @@ import Recite from "./pages/Recite";
 import PageNotFound from "./lib/PageNotFound";
 
 export default function App() {
+  const redirectTarget = new URLSearchParams(window.location.search).get("redirect");
+
   return (
     <ThemeProvider>
       <BrowserRouter>
         <Routes>
+          {redirectTarget ? <Route path="/" element={<Navigate to={redirectTarget} replace />} /> : null}
           <Route path="/" element={<LocaleRedirect />} />
           <Route path="/:lang" element={<LandingPage />} />
           <Route path="/:lang/landing" element={<LandingPage />} />

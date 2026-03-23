@@ -22,6 +22,8 @@ export const MKT = {
     recitationRecordingDesc: "Record every verse and review quality before finalizing your session.",
     progressIntelligence: "Progress Intelligence",
     progressIntelligenceDesc: "Track streaks, completion, and daily consistency for long-term Hifz success.",
+    featuresMetaDescription: "Explore Hifd Quran features for Quran memorization, including smart chunking, verse recording, repetition playback, and progress tracking.",
+    aboutMetaDescription: "Learn about Hifd Quran, a Quran memorization app designed around voice recording, repetition, and structured Hifz practice.",
     footer: "By the فضل of Allah سبحانه وتعالى · Built by ai7sky.com team · {year}",
     featuresItems: [
       ["Chunk Learning Engine", "Automatic chunk generation with overlap to reinforce memorization continuity."],

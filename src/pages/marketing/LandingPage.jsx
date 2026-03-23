@@ -9,18 +9,44 @@ export default function LandingPage() {
   const { lang: rawLang } = useParams();
   const lang = normalizeLang(rawLang || "en");
   const t = MKT[lang] || MKT.en;
+  const siteUrl = "https://hifzquran.los.ma";
+  const pageUrl = `${siteUrl}/${lang}/landing`;
+  const imageUrl = `${siteUrl}/assets/5811a2a1-a940-415f-aca8-78cbfc549bc9.png`;
   const alternates = SUPPORTED_LANGS.map((l) => ({ hrefLang: l, href: `https://hifdquran.los.ma/${l}` }));
   const isEn = lang === "en";
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: t.name,
+    applicationCategory: "EducationalApplication",
+    operatingSystem: "Web",
+    description: t.desc,
+    url: pageUrl,
+    image: imageUrl,
+    inLanguage: lang,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "AI7SKY",
+      url: "https://ai7sky.com/",
+    },
+  };
 
   return (
     <MarketingLayout lang={lang}>
       <SeoHead
         title={`${t.name} | ${t.hero}`}
         description={t.desc}
-        canonical={`https://hifdquran.los.ma/${lang}/landing`}
+        canonical={pageUrl}
         keywords="hifz quran app, quran memorization app, memorize quran with your own voice, quran memorization by listening, record your recitation quran app, hifz app with repeat playback"
         lang={lang}
-        alternates={alternates.map((item) => ({ ...item, href: `https://hifdquran.los.ma/${item.hrefLang}/landing` }))}
+        image={imageUrl}
+        alternates={alternates.map((item) => ({ ...item, href: `${siteUrl}/${item.hrefLang}/landing` }))}
+        schema={schema}
       />
 
       <section className="text-center py-8">

@@ -8,17 +8,31 @@ export default function AboutPage() {
   const { lang: rawLang } = useParams();
   const lang = normalizeLang(rawLang || "en");
   const t = MKT[lang] || MKT.en;
-  const alternates = SUPPORTED_LANGS.map((l) => ({ hrefLang: l, href: `https://hifdquran.los.ma/${l}/about` }));
+  const siteUrl = "https://hifzquran.los.ma";
+  const pageUrl = `${siteUrl}/${lang}/about`;
+  const imageUrl = `${siteUrl}/assets/5811a2a1-a940-415f-aca8-78cbfc549bc9.png`;
+  const alternates = SUPPORTED_LANGS.map((l) => ({ hrefLang: l, href: `${siteUrl}/${l}/about` }));
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: `${t.name} ${t.about}`,
+    description: t.aboutMetaDescription || t.desc,
+    url: pageUrl,
+    inLanguage: lang,
+    image: imageUrl,
+  };
 
   return (
     <MarketingLayout lang={lang}>
       <SeoHead
         title={`${t.name} | ${t.about}`}
-        description={t.desc}
-        canonical={`https://hifdquran.los.ma/${lang}/about`}
+        description={t.aboutMetaDescription || t.desc}
+        canonical={pageUrl}
         keywords="about hifd quran, quran memorization method, islamic learning app"
         lang={lang}
         alternates={alternates}
+        image={imageUrl}
+        schema={schema}
       />
       <h1 className="text-3xl font-bold text-[#F2D675]">{t.about}</h1>
       <div className="mt-6 space-y-4 text-[#F8F3E8]/90">
